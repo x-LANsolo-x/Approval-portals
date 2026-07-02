@@ -74,36 +74,60 @@ class _SheetCache:
 
     # ------------------------------------------------------------------
     def _warm_loop(self):
-        """Background daemon: refresh already-cached keys approaching expiry."""
+        """Background daemon: refresh all HOT_KEYS periodically to ensure 100% cache hits."""
         HOT_KEYS = [
+            ('1xcO6FLizc9TGLd2_ZckxTuInqrAPKyNQkjtJV8E-rpU', 'Sheet1'),
+            ('1UkeJL4ScT3ay9sfIFjCDjYd91RIKMter1YCbi3wVo-4', 'CLUB Calender '),
             ('1FYfZH967DNvITrjE_entuSmJarJvfAYJSsnxvpWqGyQ', 'CLUBS'),
             ('1FYfZH967DNvITrjE_entuSmJarJvfAYJSsnxvpWqGyQ', 'DEPT SOCIETIES'),
             ('1FYfZH967DNvITrjE_entuSmJarJvfAYJSsnxvpWqGyQ', 'PROF. SOCIETIES'),
-            ('1UkeJL4ScT3ay9sfIFjCDjYd91RIKMter1YCbi3wVo-4', 'CLUB Calender '),
+            ('1FYfZH967DNvITrjE_entuSmJarJvfAYJSsnxvpWqGyQ', 'COMMUNITIES'),
             ('1_RE6n6V6yb2DL89HjkAACxgAkigMh1eJEAjGk3NI8Ig', 'Club'),
             ('1_RE6n6V6yb2DL89HjkAACxgAkigMh1eJEAjGk3NI8Ig', 'Dept Societies'),
             ('1_RE6n6V6yb2DL89HjkAACxgAkigMh1eJEAjGk3NI8Ig', 'Proffessional Societies'),
+            ('1TylYwnBjlXfno-SrFMt5fkfzl9Du24enN5yPjyD5hPM', 'Admin'),
+            ('1TylYwnBjlXfno-SrFMt5fkfzl9Du24enN5yPjyD5hPM', 'CFC'),
+            ('1TylYwnBjlXfno-SrFMt5fkfzl9Du24enN5yPjyD5hPM', 'Secretaries'),
+            ('1TylYwnBjlXfno-SrFMt5fkfzl9Du24enN5yPjyD5hPM', 'General'),
+            ('1L4YSq9py4dGrD4Y2j--tSdwXrfQkWPPDU1RA4JVrXz8', 'Sheet1'),
         ]
-        time.sleep(30)  # wait for server to be fully ready
+        
+        # Initial warming of all hot keys
+        time.sleep(2)
+        print("[cache] Starting initial background prefetch of Google Sheets...")
+        for sid, sname in HOT_KEYS:
+            try:
+                self._fetch_and_store(sid, sname)
+                time.sleep(3.5)
+            except Exception as e:
+                print(f"[cache] Failed to prefetch {sid}::{sname}: {e}")
+        print("[cache] Initial background prefetch completed! Cache is warm.")
+
         while True:
-            now = time.monotonic()
-            with self._lock:
-                snapshot = dict(self._store)
+            time.sleep(120)
             for sid, sname in HOT_KEYS:
-                key = f"{sid}::{sname}"
-                entry = snapshot.get(key)
-                # ONLY refresh keys already in cache that are about to expire.
-                # Never pre-fetch a key that was never requested — that would
-                # cause 7 API calls on startup and slow everything down.
-                if entry is not None and (entry[1] - now) < self.REFRESH_BEFORE:
-                    try:
-                        self._fetch_and_store(sid, sname)
-                        time.sleep(3)  # pace requests to avoid rate-limit
-                    except Exception:
-                        pass
-            time.sleep(30)  # check every 30 s
+                try:
+                    self._fetch_and_store(sid, sname)
+                    time.sleep(3.5)
+                except Exception as e:
+                    print(f"[cache] Failed to refresh {sid}::{sname}: {e}")
 
 _cache = _SheetCache()
+
+_details_cache = {}
+_DETAILS_CACHE_TTL = 30  # seconds
+
+def _cached_details_view(path, fetch_fn):
+    now = time.monotonic()
+    cached = _details_cache.get(path)
+    if cached and now < cached[1]:
+        return cached[0]
+    response = fetch_fn()
+    _details_cache[path] = (response, time.monotonic() + _DETAILS_CACHE_TTL)
+    return response
+
+def clear_details_cache():
+    _details_cache.clear()
 
 def _cached_sheet(spreadsheet_id, sheet_name):
     """
@@ -291,220 +315,241 @@ def all_credentials(request):
         return JsonResponse(dictfetchall(cursor), safe=False)
 
 def club_details(request):
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT * FROM Clubs")
-        rows = dictfetchall(cursor)
-        
-        details = []
-        for row in rows:
-            cluster = row.get('cluster', '') or ''
-            dept = row.get('department', '')
-            cluster_dept = f"{cluster} - {dept}" if dept else cluster
+    def _fetch():
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM Clubs")
+            rows = dictfetchall(cursor)
             
-            details.append({
-                'Registration Code': row.get('registration_code', ''),
-                'Registration Name': row.get('registration_name', ''),
-                'Club Name': row.get('registration_name', ''),
-                'Faculty Champion': row.get('faculty_champion', ''),
-                'Employee ID': row.get('employee_id', ''),
-                'Contact Number': row.get('contact_number', ''),
-                'Email ID': row.get('email_id', ''),
-                'Cluster / Department': cluster_dept,
-                'Secretary': row.get('secretary', ''),
-                'Sec. UID': row.get('sec_uid', ''),
-                'Secretary Email': row.get('secretary_email', ''),
-                'Secretary Contact': row.get('secretary_contact', ''),
-                'Jt. SECRETARY': row.get('jt_secretary', ''),
-                'Jt. SEC. UID': row.get('jt_sec_uid', ''),
-                'Jt. SEC EMAIL': row.get('jt_sec_email', ''),
-                'Jt. SEC CONTACT': row.get('jt_sec_contact', ''),
-                'approved_budget': row.get('approved_budget'),
-                'spent_budget': row.get('spent_budget', 0.0)
-            })
-    return JsonResponse({'details': details})
+            details = []
+            for row in rows:
+                cluster = row.get('cluster', '') or ''
+                dept = row.get('department', '')
+                cluster_dept = f"{cluster} - {dept}" if dept else cluster
+                
+                details.append({
+                    'Registration Code': row.get('registration_code', ''),
+                    'Registration Name': row.get('registration_name', ''),
+                    'Club Name': row.get('registration_name', ''),
+                    'Faculty Champion': row.get('faculty_champion', ''),
+                    'Employee ID': row.get('employee_id', ''),
+                    'Contact Number': row.get('contact_number', ''),
+                    'Email ID': row.get('email_id', ''),
+                    'Cluster / Department': cluster_dept,
+                    'Secretary': row.get('secretary', ''),
+                    'Sec. UID': row.get('sec_uid', ''),
+                    'Secretary Email': row.get('secretary_email', ''),
+                    'Secretary Contact': row.get('secretary_contact', ''),
+                    'Jt. SECRETARY': row.get('jt_secretary', ''),
+                    'Jt. SEC. UID': row.get('jt_sec_uid', ''),
+                    'Jt. SEC EMAIL': row.get('jt_sec_email', ''),
+                    'Jt. SEC CONTACT': row.get('jt_sec_contact', ''),
+                    'approved_budget': row.get('approved_budget'),
+                    'spent_budget': row.get('spent_budget', 0.0)
+                })
+        return JsonResponse({'details': details})
+    return _cached_details_view('club_details', _fetch)
 
 def department_details(request):
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT * FROM departments")
-        rows = dictfetchall(cursor)
-        
-        # Prefetch entity registrations to optimize/match
-        cursor.execute("SELECT * FROM intranetapp_entityregistration")
-        reg_rows = dictfetchall(cursor)
-        
-        # Prefetch dept mapping
-        cursor.execute("SELECT * FROM intranetapp_dept")
-        dept_rows = dictfetchall(cursor)
-        dept_map = {d['dept_id']: d['dept_name'] for d in dept_rows}
-        
-        details = []
-        for row in rows:
-            name = row.get('name', '') or ''
-            dept_id = row.get('dept_id', '') or ''
+    def _fetch():
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM departments")
+            rows = dictfetchall(cursor)
             
-            # Find matching entity registration
-            matched_reg = None
+            # Prefetch entity registrations to optimize/match
+            try:
+                cursor.execute("SELECT * FROM intranetapp_entityregistration")
+                reg_rows = dictfetchall(cursor)
+            except Exception as e:
+                print(f"[department_details] Warning querying intranetapp_entityregistration: {e}")
+                reg_rows = []
             
-            # First try: match via intranetapp_dept and department_id
-            matched_dept_id = None
-            for d_id, d_name in dept_map.items():
-                n1 = name.lower().replace('-', '').replace(' ', '')
-                n2 = d_name.lower().replace('-', '').replace(' ', '')
-                if n1 == n2 or n1 in n2 or n2 in n1:
-                    matched_dept_id = d_id
-                    break
+            # Prefetch dept mapping
+            try:
+                cursor.execute("SELECT * FROM intranetapp_dept")
+                dept_rows = dictfetchall(cursor)
+                dept_map = {d['dept_id']: d['dept_name'] for d in dept_rows}
+            except Exception as e:
+                print(f"[department_details] Warning querying intranetapp_dept: {e}")
+                dept_rows = []
+                dept_map = {}
             
-            if matched_dept_id is not None:
-                matched_reg = next((r for r in reg_rows if r.get('department_id') == matched_dept_id), None)
-            
-            # Second try: fallback to name keyword match in registeration_name
-            if not matched_reg:
-                n_clean = name.lower().replace('-', '').replace(' ', '')
-                for r in reg_rows:
-                    r_name = (r.get('registeration_name') or '').lower().replace('_', '').replace(' ', '')
-                    if n_clean in r_name or r_name in n_clean:
-                        matched_reg = r
+            details = []
+            for row in rows:
+                name = row.get('name', '') or ''
+                dept_id = row.get('dept_id', '') or ''
+                
+                # Find matching entity registration
+                matched_reg = None
+                
+                # First try: match via intranetapp_dept and department_id
+                matched_dept_id = None
+                for d_id, d_name in dept_map.items():
+                    n1 = name.lower().replace('-', '').replace(' ', '')
+                    n2 = d_name.lower().replace('-', '').replace(' ', '')
+                    if n1 == n2 or n1 in n2 or n2 in n1:
+                        matched_dept_id = d_id
                         break
-            
-            cluster = row.get('cluster', '') or ''
-            cluster_dept = f"{cluster} - {name}" if name else cluster
-            
-            if matched_reg:
-                details.append({
-                    'Registration Code': dept_id or matched_reg.get('registeration_code', ''),
-                    'Registration Name': name or matched_reg.get('registeration_name', ''),
-                    'Department Name': name,
-                    'Club Name': name,
-                    'Faculty Champion': matched_reg.get('faculty_advisory_name', '') or '',
-                    'Employee ID': matched_reg.get('faculty_advisory_empcode', '') or '',
-                    'Contact Number': matched_reg.get('faculty_advisory_mobile', '') or '',
-                    'Email ID': matched_reg.get('faculty_advisory_email', '') or '',
-                    'Cluster / Department': cluster_dept,
-                    'Secretary': matched_reg.get('Secretary_name', '') or '',
-                    'Sec. UID': matched_reg.get('Secretary_uid', '') or '',
-                    'Secretary Email': matched_reg.get('Secretary_email', '') or '',
-                    'Secretary Contact': matched_reg.get('Secretary_mobile', '') or '',
-                    'Jt. SECRETARY': matched_reg.get('Joint_Secretary_name', '') or '',
-                    'Jt. SEC. UID': matched_reg.get('Joint_Secretary_uid', '') or '',
-                    'Jt. SEC EMAIL': matched_reg.get('Joint_Secretary_email', '') or '',
-                    'Jt. SEC CONTACT': matched_reg.get('Joint_Secretary_mobile', '') or '',
-                    'approved_budget': row.get('approved_budget'),
-                    'spent_budget': row.get('spent_budget', 0.0)
-                })
-            else:
-                details.append({
-                    'Registration Code': dept_id,
-                    'Registration Name': name,
-                    'Department Name': name,
-                    'Club Name': name,
-                    'Faculty Champion': '',
-                    'Employee ID': '',
-                    'Contact Number': '',
-                    'Email ID': '',
-                    'Cluster / Department': cluster_dept,
-                    'Secretary': '', 'Sec. UID': '', 'Secretary Email': '', 'Secretary Contact': '',
-                    'Jt. SECRETARY': '', 'Jt. SEC. UID': '', 'Jt. SEC EMAIL': '', 'Jt. SEC CONTACT': '',
-                    'approved_budget': row.get('approved_budget'),
-                    'spent_budget': row.get('spent_budget', 0.0)
-                })
-    return JsonResponse({'details': details})
+                
+                if matched_dept_id is not None:
+                    matched_reg = next((r for r in reg_rows if r.get('department_id') == matched_dept_id), None)
+                
+                # Second try: fallback to name keyword match in registeration_name
+                if not matched_reg:
+                    n_clean = name.lower().replace('-', '').replace(' ', '')
+                    for r in reg_rows:
+                        r_name = (r.get('registeration_name') or '').lower().replace('_', '').replace(' ', '')
+                        if n_clean in r_name or r_name in n_clean:
+                            matched_reg = r
+                            break
+                
+                cluster = row.get('cluster', '') or ''
+                cluster_dept = f"{cluster} - {name}" if name else cluster
+                
+                if matched_reg:
+                    details.append({
+                        'Registration Code': dept_id or matched_reg.get('registeration_code', ''),
+                        'Registration Name': name or matched_reg.get('registeration_name', ''),
+                        'Department Name': name,
+                        'Club Name': name,
+                        'Faculty Champion': matched_reg.get('faculty_advisory_name', '') or '',
+                        'Employee ID': matched_reg.get('faculty_advisory_empcode', '') or '',
+                        'Contact Number': matched_reg.get('faculty_advisory_mobile', '') or '',
+                        'Email ID': matched_reg.get('faculty_advisory_email', '') or '',
+                        'Cluster / Department': cluster_dept,
+                        'Secretary': matched_reg.get('Secretary_name', '') or '',
+                        'Sec. UID': matched_reg.get('Secretary_uid', '') or '',
+                        'Secretary Email': matched_reg.get('Secretary_email', '') or '',
+                        'Secretary Contact': matched_reg.get('Secretary_mobile', '') or '',
+                        'Jt. SECRETARY': matched_reg.get('Joint_Secretary_name', '') or '',
+                        'Jt. SEC. UID': matched_reg.get('Joint_Secretary_uid', '') or '',
+                        'Jt. SEC EMAIL': matched_reg.get('Joint_Secretary_email', '') or '',
+                        'Jt. SEC CONTACT': matched_reg.get('Joint_Secretary_mobile', '') or '',
+                        'approved_budget': row.get('approved_budget'),
+                        'spent_budget': row.get('spent_budget', 0.0)
+                    })
+                else:
+                    details.append({
+                        'Registration Code': dept_id,
+                        'Registration Name': name,
+                        'Department Name': name,
+                        'Club Name': name,
+                        'Faculty Champion': '',
+                        'Employee ID': '',
+                        'Contact Number': '',
+                        'Email ID': '',
+                        'Cluster / Department': cluster_dept,
+                        'Secretary': '', 'Sec. UID': '', 'Secretary Email': '', 'Secretary Contact': '',
+                        'Jt. SECRETARY': '', 'Jt. SEC. UID': '', 'Jt. SEC EMAIL': '', 'Jt. SEC CONTACT': '',
+                        'approved_budget': row.get('approved_budget'),
+                        'spent_budget': row.get('spent_budget', 0.0)
+                    })
+            return JsonResponse({'details': details})
+    return _cached_details_view('department_details', _fetch)
 
 def professional_details(request):
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT * FROM professional_societies")
-        rows = dictfetchall(cursor)
-        
-        # Prefetch entity registrations
-        cursor.execute("SELECT * FROM intranetapp_entityregistration")
-        reg_rows = dictfetchall(cursor)
-        
-        import re
-        def clean_words(text):
-            text = text.lower().replace('_', ' ').replace('-', ' ').replace('(', ' ').replace(')', ' ')
-            words = re.findall(r'\b\w+\b', text)
-            ignore = {'professional', 'society', 'student', 'chapter', 'university', 'chandigarh', 'cu', 'of', 'for', 'in', 'and', 'engg', 'association', 'computing', 'machinery'}
-            return set(w for w in words if w not in ignore)
+    def _fetch():
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM professional_societies")
+            rows = dictfetchall(cursor)
             
-        details = []
-        for row in rows:
-            name = row.get('name', '') or ''
-            prof_soc_id = row.get('prof_soc_id', '') or ''
+            # Prefetch entity registrations
+            try:
+                cursor.execute("SELECT * FROM intranetapp_entityregistration")
+                reg_rows = dictfetchall(cursor)
+            except Exception as e:
+                print(f"[professional_details] Warning querying intranetapp_entityregistration: {e}")
+                reg_rows = []
             
-            # Find matching entity registration
-            matched_reg = None
-            soc_words = clean_words(name)
-            for r in reg_rows:
-                r_name = r.get('registeration_name') or ''
-                reg_words = clean_words(r_name)
-                if soc_words.intersection(reg_words):
-                    matched_reg = r
-                    break
-                    
-            if matched_reg:
+            import re
+            def clean_words(text):
+                text = text.lower().replace('_', ' ').replace('-', ' ').replace('(', ' ').replace(')', ' ')
+                words = re.findall(r'\b\w+\b', text)
+                ignore = {'professional', 'society', 'student', 'chapter', 'university', 'chandigarh', 'cu', 'of', 'for', 'in', 'and', 'engg', 'association', 'computing', 'machinery'}
+                return set(w for w in words if w not in ignore)
+                
+            details = []
+            for row in rows:
+                name = row.get('name', '') or ''
+                prof_soc_id = row.get('prof_soc_id', '') or ''
+                
+                # Find matching entity registration
+                matched_reg = None
+                soc_words = clean_words(name)
+                for r in reg_rows:
+                    r_name = r.get('registeration_name') or ''
+                    reg_words = clean_words(r_name)
+                    if soc_words.intersection(reg_words):
+                        matched_reg = r
+                        break
+                        
+                if matched_reg:
+                    details.append({
+                        'Registration Code': prof_soc_id or matched_reg.get('registeration_code', ''),
+                        'Registration Name': name or matched_reg.get('registeration_name', ''),
+                        'Society Name': name,
+                        'Club Name': name,
+                        'Faculty Champion': matched_reg.get('faculty_advisory_name', '') or '',
+                        'Employee ID': matched_reg.get('faculty_advisory_empcode', '') or '',
+                        'Contact Number': matched_reg.get('faculty_advisory_mobile', '') or '',
+                        'Email ID': matched_reg.get('faculty_advisory_email', '') or '',
+                        'Cluster / Department': row.get('department_mapped', '') or '',
+                        'Secretary': matched_reg.get('Secretary_name', '') or '',
+                        'Sec. UID': matched_reg.get('Secretary_uid', '') or '',
+                        'Secretary Email': matched_reg.get('Secretary_email', '') or '',
+                        'Secretary Contact': matched_reg.get('Secretary_mobile', '') or '',
+                        'Jt. SECRETARY': matched_reg.get('Joint_Secretary_name', '') or '',
+                        'Jt. SEC. UID': matched_reg.get('Joint_Secretary_uid', '') or '',
+                        'Jt. SEC EMAIL': matched_reg.get('Joint_Secretary_email', '') or '',
+                        'Jt. SEC CONTACT': matched_reg.get('Joint_Secretary_mobile', '') or '',
+                        'approved_budget': row.get('approved_budget'),
+                        'spent_budget': row.get('spent_budget', 0.0)
+                    })
+                else:
+                    details.append({
+                        'Registration Code': prof_soc_id,
+                        'Registration Name': name,
+                        'Society Name': name,
+                        'Club Name': name,
+                        'Faculty Champion': '',
+                        'Employee ID': '',
+                        'Contact Number': '',
+                        'Email ID': '',
+                        'Cluster / Department': row.get('department_mapped', '') or '',
+                        'Secretary': '', 'Sec. UID': '', 'Secretary Email': '', 'Secretary Contact': '',
+                        'Jt. SECRETARY': '', 'Jt. SEC. UID': '', 'Jt. SEC EMAIL': '', 'Jt. SEC CONTACT': '',
+                        'approved_budget': row.get('approved_budget'),
+                        'spent_budget': row.get('spent_budget', 0.0)
+                    })
+            return JsonResponse({'details': details})
+    return _cached_details_view('professional_details', _fetch)
+
+def community_details(request):
+    def _fetch():
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM communities")
+            rows = dictfetchall(cursor)
+
+            details = []
+            for row in rows:
+                name = row.get('name', '') or ''
+                comm_id = row.get('comm_id', '') or ''
                 details.append({
-                    'Registration Code': prof_soc_id or matched_reg.get('registeration_code', ''),
-                    'Registration Name': name or matched_reg.get('registeration_name', ''),
-                    'Society Name': name,
-                    'Club Name': name,
-                    'Faculty Champion': matched_reg.get('faculty_advisory_name', '') or '',
-                    'Employee ID': matched_reg.get('faculty_advisory_empcode', '') or '',
-                    'Contact Number': matched_reg.get('faculty_advisory_mobile', '') or '',
-                    'Email ID': matched_reg.get('faculty_advisory_email', '') or '',
-                    'Cluster / Department': row.get('department_mapped', '') or '',
-                    'Secretary': matched_reg.get('Secretary_name', '') or '',
-                    'Sec. UID': matched_reg.get('Secretary_uid', '') or '',
-                    'Secretary Email': matched_reg.get('Secretary_email', '') or '',
-                    'Secretary Contact': matched_reg.get('Secretary_mobile', '') or '',
-                    'Jt. SECRETARY': matched_reg.get('Joint_Secretary_name', '') or '',
-                    'Jt. SEC. UID': matched_reg.get('Joint_Secretary_uid', '') or '',
-                    'Jt. SEC EMAIL': matched_reg.get('Joint_Secretary_email', '') or '',
-                    'Jt. SEC CONTACT': matched_reg.get('Joint_Secretary_mobile', '') or '',
-                    'approved_budget': row.get('approved_budget'),
-                    'spent_budget': row.get('spent_budget', 0.0)
-                })
-            else:
-                details.append({
-                    'Registration Code': prof_soc_id,
+                    'Registration Code': comm_id,
                     'Registration Name': name,
-                    'Society Name': name,
+                    'Community Name': name,
                     'Club Name': name,
                     'Faculty Champion': '',
                     'Employee ID': '',
                     'Contact Number': '',
                     'Email ID': '',
-                    'Cluster / Department': row.get('department_mapped', '') or '',
+                    'Cluster / Department': '',
                     'Secretary': '', 'Sec. UID': '', 'Secretary Email': '', 'Secretary Contact': '',
                     'Jt. SECRETARY': '', 'Jt. SEC. UID': '', 'Jt. SEC EMAIL': '', 'Jt. SEC CONTACT': '',
                     'approved_budget': row.get('approved_budget'),
                     'spent_budget': row.get('spent_budget', 0.0)
                 })
-    return JsonResponse({'details': details})
-
-def community_details(request):
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT * FROM communities")
-        rows = dictfetchall(cursor)
-
-        details = []
-        for row in rows:
-            name = row.get('name', '') or ''
-            comm_id = row.get('comm_id', '') or ''
-            details.append({
-                'Registration Code': comm_id,
-                'Registration Name': name,
-                'Community Name': name,
-                'Club Name': name,
-                'Faculty Champion': '',
-                'Employee ID': '',
-                'Contact Number': '',
-                'Email ID': '',
-                'Cluster / Department': '',
-                'Secretary': '', 'Sec. UID': '', 'Secretary Email': '', 'Secretary Contact': '',
-                'Jt. SECRETARY': '', 'Jt. SEC. UID': '', 'Jt. SEC EMAIL': '', 'Jt. SEC CONTACT': '',
-                'approved_budget': row.get('approved_budget'),
-                'spent_budget': row.get('spent_budget', 0.0)
-            })
-    return JsonResponse({'details': details})
+            return JsonResponse({'details': details})
+    return _cached_details_view('community_details', _fetch)
 
 @csrf_exempt
 def update_budget(request):
@@ -595,7 +640,7 @@ def event_publication(request, login_id=None):
 # --- Google Sheets Endpoints ---
 
 def data_sheet(request, sheet_name):
-    rows = get_sheet_data_raw(SPREADSHEET_ID, sheet_name)
+    rows = _cached_sheet(SPREADSHEET_ID, sheet_name)
     if not rows or len(rows) == 0:
         return JsonResponse({'message': 'No data found in this sheet.'}, status=404)
         
@@ -612,7 +657,7 @@ def data_sheet(request, sheet_name):
 @csrf_exempt
 def proposed_events(request, row_index=None):
     if request.method == 'GET':
-        rows = get_sheet_data_raw(PROPOSED_EVENTS_SPREADSHEET_ID, 'Sheet1')
+        rows = _cached_sheet(PROPOSED_EVENTS_SPREADSHEET_ID, 'Sheet1')
         if not rows or len(rows) < 2:
             return JsonResponse({'events': []})
             
@@ -1115,10 +1160,10 @@ def events(request):
 def all_proposed_calendar(request):
     try:
         master_id = '1FYfZH967DNvITrjE_entuSmJarJvfAYJSsnxvpWqGyQ'
-        clubs_rows = get_sheet_data_raw(master_id, 'CLUBS')
-        depts_rows = get_sheet_data_raw(master_id, 'DEPT SOCIETIES')
-        prof_rows  = get_sheet_data_raw(master_id, 'PROF. SOCIETIES')
-        comm_rows  = get_sheet_data_raw(master_id, 'COMMUNITIES')
+        clubs_rows = _cached_sheet(master_id, 'CLUBS')
+        depts_rows = _cached_sheet(master_id, 'DEPT SOCIETIES')
+        prof_rows  = _cached_sheet(master_id, 'PROF. SOCIETIES')
+        comm_rows  = _cached_sheet(master_id, 'COMMUNITIES')
 
         all_events = []
 
@@ -1216,7 +1261,7 @@ def auth_login(request):
             
         sheet_names = ['Admin', 'CFC', 'Secretaries', 'General']
         for sheet in sheet_names:
-            rows = get_sheet_data_raw(SPREADSHEET_ID, sheet)
+            rows = _cached_sheet(SPREADSHEET_ID, sheet)
             if not rows or len(rows) == 0:
                 continue
             for i in range(1, len(rows)):

@@ -1,8 +1,12 @@
 import axios from "axios";
 import Swal from "sweetalert2";
 
+export const API_BASE = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+  ? "http://127.0.0.1:8000"
+  : "https://approval-portals.onrender.com";
+
 const apiClient = axios.create({
-  baseURL: "https://approval-portals.onrender.com/",
+  baseURL: API_BASE,
   headers: {
     "Content-Type": "application/json",
   },

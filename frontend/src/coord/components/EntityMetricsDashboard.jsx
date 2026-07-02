@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE } from '../../config/apiClient';
 import { 
     ResponsiveContainer, 
     BarChart, 
@@ -42,17 +43,17 @@ const EntityMetricsDashboard = () => {
                 const clubName = parsedUser.name || '';
 
                 // Define endpoint for details
-                let detailsUrl = 'https://approval-portals.onrender.com/api/club-details';
+                let detailsUrl = `${API_BASE}/api/club-details`;
                 if (role === 'Department') {
-                    detailsUrl = 'https://approval-portals.onrender.com/api/department-details';
+                    detailsUrl = `${API_BASE}/api/department-details`;
                 } else if (role === 'Professional Society') {
-                    detailsUrl = 'https://approval-portals.onrender.com/api/professional-details';
+                    detailsUrl = `${API_BASE}/api/professional-details`;
                 } else if (role === 'Community') {
-                    detailsUrl = 'https://approval-portals.onrender.com/api/community-details';
+                    detailsUrl = `${API_BASE}/api/community-details`;
                 }
 
                 // Fetch details and events in parallel
-                const eventsUrl = `https://approval-portals.onrender.com/api/events?role=${encodeURIComponent(role)}&club=${encodeURIComponent(clubName)}`;
+                const eventsUrl = `${API_BASE}/api/events?role=${encodeURIComponent(role)}&club=${encodeURIComponent(clubName)}`;
                 const [detailsRes, eventsRes] = await Promise.all([
                     fetch(detailsUrl),
                     fetch(eventsUrl)

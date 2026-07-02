@@ -19,7 +19,7 @@ import {
   FiMoon
 } from "react-icons/fi";
 import { MdOutlineAutoAwesome } from "react-icons/md";
-import apiClient from "../config/apiClient";
+import apiClient, { API_BASE } from "../config/apiClient";
 
 const Notification = ({ type, message, description, onClose }) => {
   const getIcon = () => {
@@ -84,7 +84,7 @@ const Login = ({ onLogin, theme, toggleTheme }) => {
       const lowerEmail = email.toLowerCase();
       
       if (lowerEmail.endsWith("@cu")) {
-          const res = await fetch("https://approval-portals.onrender.com/api/auth/club-login", {
+          const res = await fetch(`${API_BASE}/api/auth/club-login`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ email: lowerEmail, password })
