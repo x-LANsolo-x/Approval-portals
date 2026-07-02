@@ -18,11 +18,13 @@ fpdf==1.7.2
 google-auth==2.55.0
 google-auth-oauthlib==1.4.0
 gspread==6.2.1
+gunicorn==26.0.0
 idna==3.18
 lxml==6.1.1
 numpy==2.4.6
 oauthlib==3.3.1
 openpyxl==3.1.5
+packaging==26.2
 pandas==3.0.3
 phonenumbers==9.0.32
 pillow==12.2.0
