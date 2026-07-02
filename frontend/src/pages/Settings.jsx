@@ -287,12 +287,6 @@ const Settings = () => {
               <span className={styles.label}>Role / Entity Type</span>
               <span className={styles.value}>{user?.role_name || user?.role || "N/A"}</span>
             </li>
-            {user?.department_name && (
-              <li>
-                <span className={styles.label}>Department</span>
-                <span className={styles.value}>{user.department_name}</span>
-              </li>
-            )}
           </ul>
         </div>
       </div>
