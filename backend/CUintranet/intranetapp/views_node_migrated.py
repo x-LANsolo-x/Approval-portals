@@ -2101,3 +2101,48 @@ def superadmin_budget(request):
         return JsonResponse({"budget_data": all_data})
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+
+
+@csrf_exempt
+def superadmin_users(request):
+    """Return all portal user accounts: roles table + entity users."""
+    try:
+        all_users = []
+        with connection.cursor() as cursor:
+            # Roles table (Data Analyst, Super Admin, etc.)
+            cursor.execute("SELECT id, name, login_id, role FROM roles ORDER BY id")
+            for row in cursor.fetchall():
+                all_users.append({
+                    "source": "roles",
+                    "id": row[0],
+                    "name": row[1],
+                    "login_id": row[2],
+                    "role": row[3],
+                    "entity_type": row[3],
+                    "cluster": "—",
+                    "contact": "—"
+                })
+
+            # Clubs
+            cursor.execute("SELECT registration_name, login_id, registration_code, cluster_department, contact_number FROM Clubs ORDER BY registration_name")
+            for row in cursor.fetchall():
+                all_users.append({"source": "clubs", "name": row[0], "login_id": row[1], "role": "Club", "entity_type": "Club", "registration_code": row[2], "cluster": row[3] or "—", "contact": row[4] or "—"})
+
+            # Departments
+            cursor.execute("SELECT name, login_id, dept_id FROM departments ORDER BY name")
+            for row in cursor.fetchall():
+                all_users.append({"source": "departments", "name": row[0], "login_id": row[1], "role": "Department", "entity_type": "Department", "registration_code": row[2], "cluster": "—", "contact": "—"})
+
+            # Professional Societies
+            cursor.execute("SELECT name, login_id, prof_soc_id FROM professional_societies ORDER BY name")
+            for row in cursor.fetchall():
+                all_users.append({"source": "professional_societies", "name": row[0], "login_id": row[1], "role": "Professional Society", "entity_type": "Professional Society", "registration_code": row[2], "cluster": "—", "contact": "—"})
+
+            # Communities
+            cursor.execute("SELECT name, login_id, comm_id FROM communities ORDER BY name")
+            for row in cursor.fetchall():
+                all_users.append({"source": "communities", "name": row[0], "login_id": row[1], "role": "Community", "entity_type": "Community", "registration_code": row[2], "cluster": "—", "contact": "—"})
+
+        return JsonResponse({"users": all_users, "total": len(all_users)})
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)

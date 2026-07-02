@@ -5,7 +5,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 
-const API = 'https://approval-portals.onrender.com';
+const API = import.meta.env.VITE_API_URL || 'https://approval-portals.onrender.com';
 
 const CHART_COLORS = ['#ffffff','#a1a1aa','#71717a','#52525b','#3f3f46','#27272a'];
 const TYPE_COLORS  = { Club:'#ffffff', Department:'#a1a1aa', 'Professional Society':'#71717a', Community:'#52525b' };
@@ -398,12 +398,127 @@ function BudgetTab() {
   );
 }
 
+// ── Users Tab ────────────────────────────────────────────────
+function UsersTab() {
+  const [users, setUsers]       = useState([]);
+  const [loading, setLoading]   = useState(false);
+  const [search, setSearch]     = useState('');
+  const [roleFilter, setRoleFilter] = useState('');
+  const [showPasswords, setShowPasswords] = useState({});
+
+  useEffect(() => {
+    setLoading(true);
+    fetch(`${API}/api/superadmin/users`)
+      .then(r => r.json())
+      .then(d => setUsers(d.users || []))
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
+  const filtered = users.filter(u => {
+    const matchRole = !roleFilter || u.entity_type === roleFilter || u.role === roleFilter;
+    const matchSearch = !search || JSON.stringify(u).toLowerCase().includes(search.toLowerCase());
+    return matchRole && matchSearch;
+  });
+
+  // Separate roles-table users (privileged) from entity users
+  const privileged = filtered.filter(u => u.source === 'roles');
+  const entityUsers = filtered.filter(u => u.source !== 'roles');
+
+  return (
+    <div className={styles.tabContent}>
+      {/* Privileged Accounts (roles table) */}
+      <p className={styles.sectionTitle}>Portal Admin Accounts (Roles Table)</p>
+      <div className={styles.tableWrap} style={{marginBottom:'1.5rem'}}>
+        <table className={styles.table}>
+          <thead><tr>
+            {['ID','Name','Login ID','Role / Portal Access'].map(h => <th key={h}>{h}</th>)}
+          </tr></thead>
+          <tbody>
+            {privileged.length === 0 ? (
+              <tr><td colSpan={4} className={styles.emptyBox}>No admin accounts found</td></tr>
+            ) : privileged.map((u, i) => (
+              <tr key={i}>
+                <td style={{color:'var(--text-muted)',fontSize:'0.8rem'}}>{u.id || '—'}</td>
+                <td style={{fontWeight:700}}>{u.name}</td>
+                <td>
+                  <code style={{
+                    background:'var(--bg-card-2)',
+                    padding:'0.2rem 0.6rem',
+                    borderRadius:6,
+                    fontSize:'0.82rem',
+                    fontFamily:'monospace',
+                    color:'var(--text-main)',
+                    border:'1px solid var(--border-color)'
+                  }}>{u.login_id || '—'}</code>
+                </td>
+                <td><span className={`${styles.badge} ${getBadgeClass(u.role)}`}>{u.role}</span></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Entity Users */}
+      <p className={styles.sectionTitle}>Entity Users (All Portals)</p>
+      <div className={styles.filtersBar}>
+        <input className={styles.filterInput} placeholder="🔍  Search name, login ID, cluster…" value={search} onChange={e => setSearch(e.target.value)} />
+        <select className={styles.filterSelect} value={roleFilter} onChange={e => setRoleFilter(e.target.value)}>
+          <option value="">All Types</option>
+          <option>Club</option><option>Department</option>
+          <option>Professional Society</option><option>Community</option>
+        </select>
+        <button className={`${styles.filterBtn} ${styles.filterBtnSecondary}`} onClick={() => { setSearch(''); setRoleFilter(''); }}>
+          Reset
+        </button>
+        <span style={{marginLeft:'auto',color:'var(--text-muted)',fontSize:'0.8rem',fontWeight:600}}>{entityUsers.length} users</span>
+      </div>
+      {loading ? (
+        <div className={styles.loadingBox}><div className={styles.spinner}/>Loading users…</div>
+      ) : (
+        <div className={styles.tableWrap}>
+          <table className={styles.table}>
+            <thead><tr>
+              {['Type','Name','Reg. Code','Login ID','Cluster / Dept','Contact'].map(h => <th key={h}>{h}</th>)}
+            </tr></thead>
+            <tbody>
+              {entityUsers.length === 0 ? (
+                <tr><td colSpan={6} className={styles.emptyBox}>No users found</td></tr>
+              ) : entityUsers.map((u, i) => (
+                <tr key={i}>
+                  <td><span className={`${styles.badge} ${getBadgeClass(u.entity_type)}`}>{u.entity_type}</span></td>
+                  <td style={{fontWeight:600,minWidth:160}}>{u.name}</td>
+                  <td style={{color:'var(--text-muted)',fontSize:'0.78rem'}}>{u.registration_code || '—'}</td>
+                  <td>
+                    <code style={{
+                      background:'var(--bg-card-2)',
+                      padding:'0.2rem 0.5rem',
+                      borderRadius:5,
+                      fontSize:'0.78rem',
+                      fontFamily:'monospace',
+                      color:'var(--text-main)',
+                      border:'1px solid var(--border-color)'
+                    }}>{u.login_id || '—'}</code>
+                  </td>
+                  <td style={{color:'var(--text-muted)'}}>{u.cluster || '—'}</td>
+                  <td style={{color:'var(--text-muted)'}}>{u.contact || '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Main Dashboard ───────────────────────────────────────────
 const TABS = [
   { id:'overview',  label:'Overview',          icon:'📊' },
   { id:'events',    label:'All Events',         icon:'📅' },
   { id:'entities',  label:'Entity Management',  icon:'🏛️' },
   { id:'budget',    label:'Budget Analysis',    icon:'💰' },
+  { id:'users',     label:'User Accounts',      icon:'👥' },
 ];
 
 export default function SuperAdminDashboard({ onLogout, theme, toggleTheme }) {
@@ -420,7 +535,7 @@ export default function SuperAdminDashboard({ onLogout, theme, toggleTheme }) {
       .finally(()=>setStatsLoading(false));
   }, []);
 
-  const TAB_TITLES = { overview:'Dashboard Overview', events:'All Events', entities:'Entity Management', budget:'Budget Analysis' };
+  const TAB_TITLES = { overview:'Dashboard Overview', events:'All Events', entities:'Entity Management', budget:'Budget Analysis', users:'User Accounts' };
 
   return (
     <div className={styles.wrapper}>
@@ -462,6 +577,7 @@ export default function SuperAdminDashboard({ onLogout, theme, toggleTheme }) {
           {activeTab==='events'    && <EventsTab />}
           {activeTab==='entities'  && <EntitiesTab />}
           {activeTab==='budget'    && <BudgetTab />}
+          {activeTab==='users'     && <UsersTab />}
         </div>
       </main>
     </div>

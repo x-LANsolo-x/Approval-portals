@@ -43,4 +43,5 @@ urlpatterns = [
     path('api/superadmin/events', views_node_migrated.superadmin_events),
     path('api/superadmin/entities', views_node_migrated.superadmin_entities),
     path('api/superadmin/budget', views_node_migrated.superadmin_budget),
+    path('api/superadmin/users', views_node_migrated.superadmin_users),
 ]
