@@ -16,10 +16,10 @@
 
 .formCard, .historyCard {
   background: var(--bg-card);
-  border: 3px solid #000000;
+  border: 3px solid var(--primary, #000000);
   padding: 2rem;
   border-radius: 28px;
-  box-shadow: 6px 6px 0px #000000, 
+  box-shadow: 6px 6px 0px var(--primary, #000000), 
               inset 2px 2px 5px rgba(255, 255, 255, 0.15), 
               inset -2px -2px 5px rgba(0, 0, 0, 0.3);
   box-sizing: border-box;
@@ -27,12 +27,12 @@
 
 .cardTitle {
   margin-bottom: 1.5rem;
-  color: #ffffff;
+  color: var(--text-main);
   font-size: 1.5rem;
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: -0.5px;
-  border-bottom: 2px solid #000000;
+  border-bottom: 2px solid var(--primary, #000000);
   padding-bottom: 0.75rem;
 }
 
@@ -66,12 +66,12 @@
   width: 100%;
   padding: 0.75rem;
   border-radius: 12px;
-  background: #0f172a;
-  border: 2px solid #000000;
-  color: white;
+  background: var(--bg-card-2, #f3f4f6);
+  border: 2px solid var(--primary, #000000);
+  color: var(--text-main);
   font-family: inherit;
-  box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.4), 
-              inset -1px -1px 3px rgba(255, 255, 255, 0.1);
+  box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.1), 
+              inset -1px -1px 3px rgba(255, 255, 255, 0.05);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   box-sizing: border-box;
 }
@@ -79,9 +79,9 @@
 .input:focus, .textarea:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 4px 4px 0px #000000,
-              inset 1px 1px 3px rgba(0, 0, 0, 0.4), 
-              inset -1px -1px 3px rgba(255, 255, 255, 0.1);
+  box-shadow: 4px 4px 0px var(--primary, #000000),
+              inset 1px 1px 3px rgba(0, 0, 0, 0.1), 
+              inset -1px -1px 3px rgba(255, 255, 255, 0.05);
 }
 
 .fileInput {
@@ -90,15 +90,15 @@
 
 .fileInput::-webkit-file-upload-button {
   background: var(--primary);
-  color: white;
-  border: 2px solid #000000;
+  color: var(--bg-card);
+  border: 2px solid var(--primary, #000000);
   padding: 0.5rem 1rem;
   border-radius: 8px;
   cursor: pointer;
   font-weight: 800;
   text-transform: uppercase;
   margin-right: 0.75rem;
-  box-shadow: 2px 2px 0px #000000, 
+  box-shadow: 2px 2px 0px var(--primary, #000000), 
               inset 1px 1px 3px rgba(255, 255, 255, 0.2), 
               inset -1px -1px 3px rgba(0, 0, 0, 0.3);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -107,7 +107,7 @@
 .fileInput::-webkit-file-upload-button:hover {
   background: var(--primary-hover);
   transform: translate(-1px, -1px);
-  box-shadow: 3px 3px 0px #000000, 
+  box-shadow: 3px 3px 0px var(--primary, #000000), 
               inset 1px 1px 3px rgba(255, 255, 255, 0.2), 
               inset -1px -1px 3px rgba(0, 0, 0, 0.3);
 }
@@ -116,8 +116,8 @@
   margin-top: 0.75rem;
   max-width: 120px;
   border-radius: 12px;
-  border: 2px solid #000000;
-  box-shadow: 3px 3px 0px #000000;
+  border: 2px solid var(--primary, #000000);
+  box-shadow: 3px 3px 0px var(--primary, #000000);
 }
 
 .textarea {
@@ -127,15 +127,15 @@
 .submitBtn {
   padding: 1rem;
   background: var(--primary);
-  color: white;
-  border: 3px solid #000000;
+  color: var(--bg-card);
+  border: 3px solid var(--primary, #000000);
   border-radius: 14px;
   font-weight: 800;
   font-size: 1rem;
   cursor: pointer;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  box-shadow: 4px 4px 0px #000000, 
+  box-shadow: 4px 4px 0px var(--primary, #000000), 
               inset 2px 2px 4px rgba(255, 255, 255, 0.25), 
               inset -2px -2px 4px rgba(0, 0, 0, 0.3);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -144,14 +144,14 @@
 .submitBtn:hover:not(:disabled) {
   background: var(--primary-hover);
   transform: translate(-1px, -1px);
-  box-shadow: 5px 5px 0px #000000, 
+  box-shadow: 5px 5px 0px var(--primary, #000000), 
               inset 2px 2px 4px rgba(255, 255, 255, 0.25), 
               inset -2px -2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .submitBtn:active:not(:disabled) {
   transform: translate(4px, 4px);
-  box-shadow: 0px 0px 0px #000000, 
+  box-shadow: 0px 0px 0px var(--primary, #000000), 
               inset 2px 2px 4px rgba(255, 255, 255, 0.25), 
               inset -2px -2px 4px rgba(0, 0, 0, 0.3);
 }
@@ -189,11 +189,11 @@
 
 .historyItem {
   padding: 1.25rem;
-  background: #0f172a;
-  border: 3px solid #000000;
+  background: var(--bg-card-2, #f3f4f6);
+  border: 3px solid var(--primary, #000000);
   border-left: 8px solid var(--primary);
   border-radius: 16px;
-  box-shadow: 4px 4px 0px #000000, 
+  box-shadow: 4px 4px 0px var(--primary, #000000), 
               inset 1px 1px 3px rgba(255, 255, 255, 0.05), 
               inset -1px -1px 3px rgba(0, 0, 0, 0.2);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -201,14 +201,14 @@
 
 .historyItem:hover {
   transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px #000000, 
+  box-shadow: 6px 6px 0px var(--primary, #000000), 
               inset 1px 1px 3px rgba(255, 255, 255, 0.05), 
               inset -1px -1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .historyItem h4 {
   margin: 0 0 0.5rem 0;
-  color: #ffffff;
+  color: var(--text-main);
   font-size: 1.15rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -221,21 +221,21 @@
 }
 
 .historyMeta strong {
-  color: #f1f5f9;
+  color: var(--text-main);
 }
 
 .statusBadge {
   display: inline-block;
   margin-top: 0.5rem;
   padding: 0.3rem 0.8rem;
-  background: var(--secondary);
-  border: 2px solid #000000;
-  color: #000000;
+  background: var(--secondary-light);
+  border: 2px solid var(--primary, #000000);
+  color: var(--text-main);
   border-radius: 10px;
   font-size: 0.8rem;
   font-weight: 800;
   text-transform: uppercase;
-  box-shadow: 2px 2px 0px #000000;
+  box-shadow: 2px 2px 0px var(--primary, #000000);
 }
 
 .emptyText {
