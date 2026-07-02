@@ -103,6 +103,10 @@ const Login = ({ onLogin, theme, toggleTheme }) => {
       }
 
       const data = response?.data;
+      if (data) {
+        data.login_id = lowerEmail;
+        data.email = lowerEmail;
+      }
       localStorage.setItem("user", JSON.stringify(data));
 
       openNotification("success", "Login Successful", "Redirecting...");

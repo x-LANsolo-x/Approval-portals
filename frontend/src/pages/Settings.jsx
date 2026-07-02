@@ -18,7 +18,32 @@ const Settings = () => {
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser);
+
+      if (!parsedUser.email && !parsedUser.login_id) {
+        fetch(`${API_BASE}/api/all-credentials`)
+          .then((res) => res.json())
+          .then((data) => {
+            if (Array.isArray(data)) {
+              const matched = data.find(
+                (item) =>
+                  item.name === parsedUser.name &&
+                  (item.type === parsedUser.role_name || item.type === parsedUser.role)
+              );
+              if (matched && matched.login_id) {
+                const updatedUser = {
+                  ...parsedUser,
+                  email: matched.login_id,
+                  login_id: matched.login_id,
+                };
+                setUser(updatedUser);
+                localStorage.setItem("user", JSON.stringify(updatedUser));
+              }
+            }
+          })
+          .catch((err) => console.error("Error resolving login id:", err));
+      }
     }
   }, []);
 
