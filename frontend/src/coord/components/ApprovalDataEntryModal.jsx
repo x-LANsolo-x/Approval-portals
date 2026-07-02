@@ -515,10 +515,10 @@ const ApprovalDataEntryModal = ({ event, clubRecord, role, onClose, onPreviewPdf
                                         display: 'block',
                                         width: '100%',
                                         padding: '8px',
-                                        border: '1px solid #ccc',
+                                        border: '1px solid var(--border-color)',
                                         borderRadius: '4px',
-                                        background: '#1e293b',
-                                        color: '#ffffff'
+                                        background: 'var(--bg-input)',
+                                        color: 'var(--text-main)'
                                     }}
                                 />
                             </div>
@@ -534,10 +534,10 @@ const ApprovalDataEntryModal = ({ event, clubRecord, role, onClose, onPreviewPdf
                                         display: 'block',
                                         width: '100%',
                                         padding: '8px',
-                                        border: '1px solid #ccc',
+                                        border: '1px solid var(--border-color)',
                                         borderRadius: '4px',
-                                        background: '#1e293b',
-                                        color: '#ffffff'
+                                        background: 'var(--bg-input)',
+                                        color: 'var(--text-main)'
                                     }}
                                 />
                             </div>

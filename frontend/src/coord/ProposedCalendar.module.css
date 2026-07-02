@@ -3,7 +3,7 @@
   justify-content: center;
   padding: 20px;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f0f4f8;
+  background-color: var(--bg-main);
   min-height: 97vh;
   overflow: auto;
 }
@@ -13,32 +13,32 @@
   width: 100%;
   margin-right: auto;
   padding: 20px;
-  background-color: #ffffff;
+  background-color: var(--bg-card);
   border-radius: 10px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--clay-shadow-dark);
   margin-top: 50px;
 }
 
 .mainTitle {
   text-align: center;
-  color: #2c3e50;
+  color: var(--text-main);
   font-size: 1.5em;
   margin-bottom: 20px;
   text-transform: uppercase;
   letter-spacing: 2px;
-  border-bottom: 3px solid #3498db;
+  border-bottom: 3px solid var(--primary);
   padding-bottom: 10px;
 }
 
 .budgetInfo {
   display: flex;
   justify-content: space-between;
-  background-color: #3498db;
-  color: white;
+  background-color: var(--primary);
+  color: var(--text-main);
   padding: 15px;
   border-radius: 8px;
   margin-bottom: 20px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--clay-shadow-dark);
 }
 
 .formScroller {
@@ -71,10 +71,10 @@
 }
 
 .activityTitle {
-  color: #2c3e50;
+  color: var(--text-main);
   font-size: 1.2em;
   margin-bottom: 20px;
-  border-left: 5px solid #3498db;
+  border-left: 5px solid var(--primary);
   padding-left: 10px;
 }
 
@@ -89,7 +89,7 @@
   display: block;
   margin-bottom: 8px;
   font-weight: bold;
-  color: #34495e;
+  color: var(--text-muted);
 }
 
 .formGroup input,
@@ -97,10 +97,12 @@
 .formGroup textarea {
   width: 100%;
   padding: 10px;
-  border: 1px solid #bdc3c7;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   font-size: 14px;
   box-sizing: border-box;
+  background: var(--bg-input);
+  color: var(--text-main);
 }
 
 /* Enhanced select field styling for better cross-platform compatibility */
@@ -123,7 +125,7 @@
 
 .helpText {
   font-size: 11px;
-  color: #666;
+  color: var(--text-muted);
   margin-top: 4px;
 }
 
@@ -201,19 +203,19 @@
   top: 51px;
   right: 20px;
   width: 40%;
-  background-color: #ffffff;
+  background-color: var(--bg-card);
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--clay-shadow-dark);
   margin-left: 30px;
   height: fit-content;
 }
 
 .fixedInfoBox h3 {
-  color: #2c3e50;
+  color: var(--text-main);
   font-size: 1.2em;
   margin-bottom: 15px;
-  border-bottom: 2px solid #3498db;
+  border-bottom: 2px solid var(--primary);
   padding-bottom: 5px;
 }
 
@@ -225,19 +227,19 @@
 
 .infoItem span:first-child {
   font-weight: bold;
-  color: #34495e;
+  color: var(--text-muted);
 }
 
 .infoItem span:last-child {
-  color: #3498db;
+  color: var(--primary);
 }
 
 .cartContainer {
   margin-top: 20px;
   padding: 15px;
-  background-color: #f8f9fa;
+  background-color: var(--bg-card-2);
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--clay-shadow-dark);
 }
 
 .cartItem {
@@ -245,7 +247,7 @@
   justify-content: space-between;
   align-items: flex-start;
   padding: 15px 0;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--border-color);
   gap: 15px;
 }
 
@@ -270,8 +272,8 @@
 }
 
 .tagItem {
-  background-color: #e3f2fd;
-  color: #1976d2;
+  background-color: var(--primary-light);
+  color: var(--primary);
   padding: 2px 6px;
   border-radius: 12px;
   font-size: 11px;
@@ -291,12 +293,13 @@
 }
 
 .warningMessage {
-  background-color: #fff3cd;
-  color: #856404;
+  background-color: var(--bg-card-2);
+  color: var(--text-muted);
   padding: 10px;
   border-radius: 4px;
   margin-bottom: 20px;
   text-align: center;
+  border: 1px solid var(--border-color);
 }
 
 /* Table Styles */
@@ -305,9 +308,9 @@
 }
 
 .tableContainer h3 {
-  color: #2c3e50;
+  color: var(--text-main);
   margin-bottom: 15px;
-  border-left: 5px solid #3498db;
+  border-left: 5px solid var(--primary);
   padding-left: 10px;
 }
 
@@ -320,7 +323,7 @@
 .activitiesTable {
   width: 100%;
   border-collapse: collapse;
-  background-color: white;
+  background-color: var(--bg-card);
   min-width: 800px;
 }
 
@@ -328,19 +331,19 @@
 .activitiesTable td {
   padding: 12px;
   text-align: left;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .activitiesTable th {
-  background-color: #f8f9fa;
+  background-color: var(--bg-card-2);
   font-weight: bold;
-  color: #2c3e50;
+  color: var(--text-main);
   position: sticky;
   top: 0;
 }
 
 .activitiesTable tr:hover {
-  background-color: #f8f9fa;
+  background-color: var(--bg-hover);
 }
 
 .removeButton {
@@ -360,7 +363,7 @@
 .emptyTable {
   text-align: center;
   padding: 40px;
-  color: #666;
+  color: var(--text-muted);
   font-style: italic;
 }
 
@@ -432,11 +435,11 @@
   }
 
   .activitiesTable tr {
-    border: 1px solid #ccc;
+    border: 1px solid var(--border-color);
     margin-bottom: 10px;
     padding: 10px;
     border-radius: 8px;
-    background-color: white;
+    background-color: var(--bg-card);
   }
 
   .activitiesTable td {
@@ -454,7 +457,7 @@
     padding-right: 10px;
     white-space: nowrap;
     font-weight: bold;
-    color: #2c3e50;
+    color: var(--text-muted);
   }
 
   .cartItem {
