@@ -11,13 +11,12 @@
 }
 
 .headerCard {
-  background: var(--bg-card);
-  border: 3px solid #000000;
-  color: white;
+  background: var(--primary);
+  border: 3px solid var(--border-clay, #000000);
   padding: 2.5rem;
   border-radius: 28px;
   margin-bottom: 2rem;
-  box-shadow: 8px 8px 0px #000000, 
+  box-shadow: 8px 8px 0px var(--border-clay, #000000), 
               inset 2px 2px 5px rgba(255, 255, 255, 0.15), 
               inset -2px -2px 5px rgba(0, 0, 0, 0.3);
   position: relative;
@@ -30,22 +29,22 @@
   font-weight: 900;
   letter-spacing: -1px;
   text-transform: uppercase;
-  color: #ffffff;
+  color: var(--bg-card);
 }
 
 .badge {
   display: inline-block;
   margin-top: 1rem;
   padding: 0.5rem 1rem;
-  background: var(--secondary);
-  border: 2px solid #000000;
-  color: #000000;
+  background: var(--bg-card);
+  border: 2px solid var(--border-clay, #000000);
+  color: var(--primary);
   border-radius: 12px;
   font-size: 0.85rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  box-shadow: 2px 2px 0px #000000;
+  box-shadow: 2px 2px 0px var(--border-clay, #000000);
 }
 
 .gridContainer {
@@ -56,10 +55,10 @@
 
 .infoCard {
   background: var(--bg-card);
-  border: 3px solid #000000;
+  border: 3px solid var(--border-clay, #000000);
   padding: 2rem;
   border-radius: 24px;
-  box-shadow: 6px 6px 0px #000000, 
+  box-shadow: 6px 6px 0px var(--border-clay, #000000), 
               inset 2px 2px 5px rgba(255, 255, 255, 0.15), 
               inset -2px -2px 5px rgba(0, 0, 0, 0.3);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -67,17 +66,17 @@
 
 .infoCard:hover {
   transform: translate(-2px, -2px);
-  box-shadow: 8px 8px 0px #000000, 
+  box-shadow: 8px 8px 0px var(--border-clay, #000000), 
               inset 2px 2px 5px rgba(255, 255, 255, 0.15), 
               inset -2px -2px 5px rgba(0, 0, 0, 0.3);
 }
 
 .infoCard h3 {
   margin-top: 0;
-  color: #ffffff;
+  color: var(--text-main, #111827);
   font-size: 1.3rem;
   margin-bottom: 1.5rem;
-  border-bottom: 2px solid #000000;
+  border-bottom: 2px solid var(--border-clay, #000000);
   padding-bottom: 0.75rem;
   display: flex;
   align-items: center;
@@ -118,7 +117,7 @@
 
 .value {
   font-size: 1.05rem;
-  color: #f1f5f9;
+  color: var(--text-main, #111827);
   font-weight: 600;
   word-break: break-word;
 }
@@ -130,12 +129,12 @@
 
 .budgetBox {
   flex: 1;
-  background: #0f172a;
+  background: var(--bg-card-2, #f3f4f6);
   padding: 1.5rem;
   border-radius: 16px;
   text-align: center;
-  border: 2px solid #000000;
-  box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.4), 
+  border: 2px solid var(--border-clay, #000000);
+  box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.1), 
               inset -1px -1px 3px rgba(255, 255, 255, 0.1);
 }
 
@@ -161,7 +160,7 @@
   align-items: center;
   min-height: 50vh;
   font-size: 1.5rem;
-  color: #ffffff;
+  color: var(--text-main, #111827);
   font-weight: 800;
   text-transform: uppercase;
 }
