@@ -37,4 +37,5 @@ urlpatterns = [
     path('api/past-events', views_node_migrated.past_events),
     path('api/update-activity-id', views_node_migrated.update_activity_id),
     path('api/cache/clear', views_node_migrated.cache_clear),
+    path('api/auth/change-password', views_node_migrated.change_password),
 ]

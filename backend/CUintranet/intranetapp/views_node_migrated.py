@@ -227,7 +227,6 @@ def club_login(request):
         
         if not email or not password:
             return JsonResponse({'error': 'Missing email or password'}, status=400)
-            
         with connection.cursor() as cursor:
             # 1. Check Clubs
             cursor.execute("SELECT registration_name FROM Clubs WHERE login_id = %s AND password = %s", [email, password])
@@ -238,7 +237,9 @@ def club_login(request):
                     'message': 'Login successful',
                     'role_name': 'Club',
                     'department_name': row[0],
-                    'name': row[0]
+                    'name': row[0],
+                    'email': email,
+                    'login_id': email
                 })
             
             # 2. Check departments
@@ -250,7 +251,9 @@ def club_login(request):
                     'message': 'Login successful',
                     'role_name': 'Department',
                     'department_name': row[0],
-                    'name': row[0]
+                    'name': row[0],
+                    'email': email,
+                    'login_id': email
                 })
                 
             # 3. Check professional_societies
@@ -263,7 +266,9 @@ def club_login(request):
                     'role_name': 'Professional Society',
                     'department_name': row[0],
                     'name': row[0],
-                    'registration_code': row[1]
+                    'registration_code': row[1],
+                    'email': email,
+                    'login_id': email
                 })
                 
             # 4. Check communities
@@ -276,9 +281,11 @@ def club_login(request):
                     'role_name': 'Community',
                     'department_name': row[0],
                     'name': row[0],
-                    'registration_code': row[1]
+                    'registration_code': row[1],
+                    'email': email,
+                    'login_id': email
                 })
-
+ 
             # 5. Check roles
             cursor.execute("SELECT name, role FROM roles WHERE login_id = %s AND password = %s", [email, password])
             row = cursor.fetchone()
@@ -288,7 +295,9 @@ def club_login(request):
                     'message': 'Login successful',
                     'role_name': row[1],
                     'department_name': row[0],
-                    'name': row[0]
+                    'name': row[0],
+                    'email': email,
+                    'login_id': email
                 })
                 
         return JsonResponse({'success': False, 'message': 'Invalid email or password'}, status=401)
@@ -1813,4 +1822,71 @@ def update_activity_id(request):
         })
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+
+@csrf_exempt
+def change_password(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    
+    try:
+        data = json.loads(request.body)
+        email = data.get('email', '').strip()
+        current_password = data.get('current_password')
+        new_password = data.get('new_password')
+        
+        if not email or not current_password or not new_password:
+            return JsonResponse({'success': False, 'message': 'Missing required fields'}, status=400)
+            
+        with connection.cursor() as cursor:
+            # 1. Try Clubs
+            cursor.execute("SELECT password FROM Clubs WHERE login_id = %s", [email])
+            row = cursor.fetchone()
+            if row:
+                if row[0] != current_password:
+                    return JsonResponse({'success': False, 'message': 'Incorrect current password'}, status=400)
+                cursor.execute("UPDATE Clubs SET password = %s WHERE login_id = %s", [new_password, email])
+                return JsonResponse({'success': True, 'message': 'Password updated successfully'})
+                
+            # 2. Try departments
+            cursor.execute("SELECT password FROM departments WHERE login_id = %s", [email])
+            row = cursor.fetchone()
+            if row:
+                if row[0] != current_password:
+                    return JsonResponse({'success': False, 'message': 'Incorrect current password'}, status=400)
+                cursor.execute("UPDATE departments SET password = %s WHERE login_id = %s", [new_password, email])
+                return JsonResponse({'success': True, 'message': 'Password updated successfully'})
+                
+            # 3. Try professional_societies
+            cursor.execute("SELECT password FROM professional_societies WHERE login_id = %s", [email])
+            row = cursor.fetchone()
+            if row:
+                if row[0] != current_password:
+                    return JsonResponse({'success': False, 'message': 'Incorrect current password'}, status=400)
+                cursor.execute("UPDATE professional_societies SET password = %s WHERE login_id = %s", [new_password, email])
+                return JsonResponse({'success': True, 'message': 'Password updated successfully'})
+                
+            # 4. Try communities
+            cursor.execute("SELECT password FROM communities WHERE login_id = %s", [email])
+            row = cursor.fetchone()
+            if row:
+                if row[0] != current_password:
+                    return JsonResponse({'success': False, 'message': 'Incorrect current password'}, status=400)
+                cursor.execute("UPDATE communities SET password = %s WHERE login_id = %s", [new_password, email])
+                return JsonResponse({'success': True, 'message': 'Password updated successfully'})
+                
+            # 5. Try roles
+            cursor.execute("SELECT password FROM roles WHERE login_id = %s", [email])
+            row = cursor.fetchone()
+            if row:
+                if row[0] != current_password:
+                    return JsonResponse({'success': False, 'message': 'Incorrect current password'}, status=400)
+                cursor.execute("UPDATE roles SET password = %s WHERE login_id = %s", [new_password, email])
+                return JsonResponse({'success': True, 'message': 'Password updated successfully'})
+                
+        return JsonResponse({'success': False, 'message': 'Account not found'}, status=404)
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': f'Server error: {str(e)}'}, status=500)
+
 

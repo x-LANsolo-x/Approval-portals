@@ -9,6 +9,7 @@ import {
   Navigate
 } from "react-router-dom";
 import Login from "./pages/Login";
+import Settings from "./pages/Settings";
 import ProtectedRoute from "./components/ProtectedRoutes";
 import Swal from "sweetalert2";
 import SideBar from "./components/Sidebar/SideBar";
@@ -238,6 +239,14 @@ function AppContent() {
               element={
                 <ProtectedRoute allowedRoles={["Club", "Department", "Professional Society", "Community"]} user={user}>
                   <ClubProfile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute allowedRoles={["Club", "Department", "Professional Society", "Community", "Data Analyst", "Data analyst"]} user={user}>
+                  <Settings />
                 </ProtectedRoute>
               }
             />

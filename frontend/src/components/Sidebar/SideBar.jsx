@@ -12,7 +12,8 @@ import {
   MdEmojiEvents,
   MdCalendarMonth,
   MdAddCircle,
-  MdHistory
+  MdHistory,
+  MdSettings
 } from "react-icons/md";
 import { FaUserTie } from "react-icons/fa6";
 import { FiLogOut, FiSun, FiMoon } from "react-icons/fi";
@@ -78,6 +79,12 @@ const routes = [
     name: "Entity Profile",
     icon: <FaUserTie />,
     allowedRoles: ["Club", "Department", "Professional Society", "Community"],
+  },
+  {
+    path: "/settings",
+    name: "Settings",
+    icon: <MdSettings />,
+    allowedRoles: ["Club", "Department", "Professional Society", "Community", "Data Analyst", "Data analyst"],
   },
 ];
 

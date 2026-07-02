@@ -1,0 +1,288 @@
+.settingsContainer {
+  padding: 2rem;
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.headerCard {
+  background: var(--primary);
+  border: 3px solid var(--border-clay, #000000);
+  padding: 2.5rem;
+  border-radius: 28px;
+  margin-bottom: 2rem;
+  box-shadow: 8px 8px 0px var(--border-clay, #000000), 
+              inset 2px 2px 5px rgba(255, 255, 255, 0.15), 
+              inset -2px -2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.title {
+  margin: 0;
+  font-size: 2.5rem;
+  font-weight: 900;
+  letter-spacing: -1px;
+  text-transform: uppercase;
+  color: var(--bg-card, #ffffff);
+}
+
+.subtitle {
+  margin: 0.5rem 0 0 0;
+  color: var(--bg-card, #ffffff);
+  opacity: 0.9;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.gridContainer {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+}
+
+@media (max-width: 992px) {
+  .gridContainer {
+    grid-template-columns: 1fr;
+  }
+}
+
+.settingsCard, .infoCard {
+  background: var(--bg-card);
+  border: 3px solid var(--border-clay, #000000);
+  padding: 2rem;
+  border-radius: 24px;
+  box-shadow: 6px 6px 0px var(--border-clay, #000000), 
+              inset 2px 2px 5px rgba(255, 255, 255, 0.15), 
+              inset -2px -2px 5px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.settingsCard:hover, .infoCard:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0px var(--border-clay, #000000), 
+              inset 2px 2px 5px rgba(255, 255, 255, 0.15), 
+              inset -2px -2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.settingsCard h3, .infoCard h3 {
+  margin-top: 0;
+  color: var(--text-main, #111827);
+  font-size: 1.3rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid var(--border-clay, #000000);
+  padding-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.5px;
+}
+
+.iconHeader {
+  color: var(--primary);
+}
+
+.sectionDesc {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.formGroup label {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border: 2px solid var(--border-clay, #000000);
+  border-radius: 12px;
+  background: var(--bg-card-2, #f3f4f6);
+  transition: all 0.2s ease;
+  overflow: hidden;
+}
+
+.inputWrapper:focus-within {
+  border-color: var(--primary);
+  box-shadow: 4px 4px 0px var(--border-clay, #000000);
+}
+
+.inputIcon {
+  padding-left: 1rem;
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+}
+
+.formInput {
+  width: 100%;
+  padding: 0.9rem 3rem 0.9rem 0.75rem;
+  border: none;
+  font-size: 0.95rem;
+  background: transparent;
+  color: var(--text-main);
+  box-sizing: border-box;
+  font-family: inherit;
+  font-weight: 600;
+}
+
+.formInput:focus {
+  outline: none;
+}
+
+.passwordToggle {
+  position: absolute;
+  right: 0.8rem;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  padding: 0.4rem;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+}
+
+.passwordToggle:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] .passwordToggle:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.submitBtn {
+  background: var(--primary);
+  color: #ffffff;
+  border: 3px solid var(--border-clay, #000000);
+  padding: 0.9rem 1.8rem;
+  border-radius: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 4px 4px 0px var(--border-clay, #000000);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  text-transform: uppercase;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.submitBtn:hover:not(:disabled) {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px var(--border-clay, #000000);
+}
+
+.submitBtn:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px var(--border-clay, #000000);
+}
+
+.submitBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.btnIcon {
+  font-size: 1.1rem;
+}
+
+.spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #ffffff;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Info list styling */
+.infoList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.infoList li {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.2rem;
+}
+
+.infoList li:last-child {
+  margin-bottom: 0;
+}
+
+.label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.3rem;
+  font-weight: 800;
+}
+
+.value {
+  font-size: 1.05rem;
+  color: var(--text-main, #111827);
+  font-weight: 600;
+  word-break: break-word;
+}
+
+/* SweetAlert customization button styles */
+.swalButton {
+  background: var(--primary) !important;
+  color: #ffffff !important;
+  border: 3px solid var(--border-clay, #000000) !important;
+  padding: 0.8rem 1.8rem !important;
+  border-radius: 12px !important;
+  font-weight: 800 !important;
+  cursor: pointer !important;
+  box-shadow: 3px 3px 0px var(--border-clay, #000000) !important;
+  text-transform: uppercase !important;
+  outline: none !important;
+}
+
+.swalButton:hover {
+  transform: translate(-1px, -1px) !important;
+  box-shadow: 4px 4px 0px var(--border-clay, #000000) !important;
+}
