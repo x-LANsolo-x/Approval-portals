@@ -2,7 +2,7 @@ import axios from "axios";
 import Swal from "sweetalert2";
 
 const apiClient = axios.create({
-  baseURL: "https://api.cuintranet.in/intranetapp/",
+  baseURL: "https://approval-portals.onrender.com/",
   headers: {
     "Content-Type": "application/json",
   },

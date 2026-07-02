@@ -15,7 +15,7 @@ const ClubProfile = () => {
           const parsedUser = JSON.parse(storedUser);
           setUserDetails(parsedUser);
           
-          const res = await fetch("http://localhost:8000/api/club-details");
+          const res = await fetch("https://approval-portals.onrender.com/api/club-details");
           if (!res.ok) {
             throw new Error('Failed to fetch club details');
           }

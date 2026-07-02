@@ -36,7 +36,7 @@ const DAProposedCalendar = () => {
   const fetchCalendar = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('http://localhost:8000/api/all-proposed-calendar');
+      const res = await fetch('https://approval-portals.onrender.com/api/all-proposed-calendar');
       const result = await res.json();
       const transformed = (result.events || []).map((ev, i) => ({
         pc_id: i + 1,
@@ -88,7 +88,7 @@ const DAProposedCalendar = () => {
 
   const handleApprove = async (event) => {
     try {
-      const res = await fetch('http://localhost:8000/api/update-master-status', {
+      const res = await fetch('https://approval-portals.onrender.com/api/update-master-status', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

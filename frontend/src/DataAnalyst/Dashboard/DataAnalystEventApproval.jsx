@@ -117,7 +117,7 @@ const DataAnalystEventApproval = () => {
   const fetchForms = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('http://localhost:8000/api/approval-forms');
+      const res = await fetch('https://approval-portals.onrender.com/api/approval-forms');
       if (!res.ok) throw new Error();
       const data = await res.json();
       setForms((data.forms || []).map((f, i) => ({ ...f, key: i })));
@@ -134,7 +134,7 @@ const DataAnalystEventApproval = () => {
     const eventName = record['Event Name'] || '';
     const entityName = record['Entity Name'] || '';
     try {
-      const res = await fetch('http://localhost:8000/api/update-master-status', {
+      const res = await fetch('https://approval-portals.onrender.com/api/update-master-status', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ eventName, entityName, newStatus }),

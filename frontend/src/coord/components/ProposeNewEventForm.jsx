@@ -70,16 +70,16 @@ const ProposeNewEventForm = () => {
 
                     if (role === 'Department') {
                         defaultEntityType = 'Departmental Society';
-                        detailsUrl = 'http://localhost:8000/api/department-details';
+                        detailsUrl = 'https://approval-portals.onrender.com/api/department-details';
                     } else if (role === 'Professional Society') {
                         defaultEntityType = 'Professional Society';
-                        detailsUrl = 'http://localhost:8000/api/professional-details';
+                        detailsUrl = 'https://approval-portals.onrender.com/api/professional-details';
                     } else if (role === 'Community') {
                         defaultEntityType = 'Community';
-                        detailsUrl = 'http://localhost:8000/api/community-details';
+                        detailsUrl = 'https://approval-portals.onrender.com/api/community-details';
                     } else {
                         defaultEntityType = 'Club';
-                        detailsUrl = 'http://localhost:8000/api/club-details';
+                        detailsUrl = 'https://approval-portals.onrender.com/api/club-details';
                     }
 
                     // Set default fields based on user details
@@ -249,7 +249,7 @@ const ProposeNewEventForm = () => {
         try {
             // Update budget
             try {
-                await fetch('http://localhost:8000/api/clubs/update-budget', {
+                await fetch('https://approval-portals.onrender.com/api/clubs/update-budget', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -263,7 +263,7 @@ const ProposeNewEventForm = () => {
             }
 
             // Submit proposed event
-            const res = await fetch('http://localhost:8000/api/propose-new-event', {
+            const res = await fetch('https://approval-portals.onrender.com/api/propose-new-event', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)

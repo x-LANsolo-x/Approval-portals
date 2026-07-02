@@ -42,19 +42,19 @@ const ProposedCalendar = () => {
 
         setLoading(true);
         try {
-            let eventsUrl = `http://localhost:8000/api/events`;
+            let eventsUrl = `https://approval-portals.onrender.com/api/events`;
             const params = new URLSearchParams();
             if (resolvedClub) params.append("club", resolvedClub);
             if (resolvedRole) params.append("role", resolvedRole);
             if (params.toString()) eventsUrl += `?${params.toString()}`;
             
-            let detailsUrl = `http://localhost:8000/api/club-details`;
+            let detailsUrl = `https://approval-portals.onrender.com/api/club-details`;
             if (resolvedRole === 'Department') {
-                detailsUrl = `http://localhost:8000/api/department-details`;
+                detailsUrl = `https://approval-portals.onrender.com/api/department-details`;
             } else if (resolvedRole === 'Professional Society') {
-                detailsUrl = `http://localhost:8000/api/professional-details`;
+                detailsUrl = `https://approval-portals.onrender.com/api/professional-details`;
             } else if (resolvedRole === 'Community') {
-                detailsUrl = `http://localhost:8000/api/community-details`;
+                detailsUrl = `https://approval-portals.onrender.com/api/community-details`;
             }
             
             const [eventsRes, clubsRes] = await Promise.all([

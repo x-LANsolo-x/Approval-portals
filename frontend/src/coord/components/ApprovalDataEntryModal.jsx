@@ -223,7 +223,7 @@ const ApprovalDataEntryModal = ({ event, clubRecord, role, onClose, onPreviewPdf
 
         // Automatically save the approved budget (if new) and increment spent budget
         try {
-            await fetch('http://localhost:8000/api/clubs/update-budget', {
+            await fetch('https://approval-portals.onrender.com/api/clubs/update-budget', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -238,7 +238,7 @@ const ApprovalDataEntryModal = ({ event, clubRecord, role, onClose, onPreviewPdf
 
         // Save complete form responses to the dedicated Google Sheet
         try {
-            const res = await fetch('http://localhost:8000/api/approval-forms/submit', {
+            const res = await fetch('https://approval-portals.onrender.com/api/approval-forms/submit', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)

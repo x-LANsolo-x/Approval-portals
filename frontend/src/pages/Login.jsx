@@ -84,7 +84,7 @@ const Login = ({ onLogin, theme, toggleTheme }) => {
       const lowerEmail = email.toLowerCase();
       
       if (lowerEmail.endsWith("@cu")) {
-          const res = await fetch("http://localhost:8000/api/auth/club-login", {
+          const res = await fetch("https://approval-portals.onrender.com/api/auth/club-login", {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ email: lowerEmail, password })

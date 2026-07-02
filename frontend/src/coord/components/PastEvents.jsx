@@ -19,7 +19,7 @@ const PastEvents = () => {
                 role: role,
                 club: name
             });
-            const res = await fetch(`http://localhost:8000/api/past-events?${params}`);
+            const res = await fetch(`https://approval-portals.onrender.com/api/past-events?${params}`);
             if (res.ok) {
                 const data = await res.json();
                 setEvents(data.events || []);
@@ -74,7 +74,7 @@ const PastEvents = () => {
 
         setSavingId(idx);
         try {
-            const res = await fetch('http://localhost:8000/api/update-activity-id', {
+            const res = await fetch('https://approval-portals.onrender.com/api/update-activity-id', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

@@ -30,7 +30,7 @@ const EventPublicationForm = () => {
 
   const fetchPublications = async (login_id) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/event-publication/${login_id}`);
+      const response = await fetch(`https://approval-portals.onrender.com/api/event-publication/${login_id}`);
       const data = await response.json();
       if (data.success) {
         setPublications(data.data);
@@ -66,7 +66,7 @@ const EventPublicationForm = () => {
         club_name: userDetails?.name
       };
 
-      const response = await fetch('http://localhost:8000/api/event-publication', {
+      const response = await fetch('https://approval-portals.onrender.com/api/event-publication', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
