@@ -20,6 +20,7 @@ import DepartmentDashboard from "./department/DepartmentDashboard";
 import ProfessionalSocietyDashboard from "./professional_society/ProfessionalSocietyDashboard";
 import CommunityDashboard from "./community/CommunityDashboard";
 import DataAnalystDashboard from "./DataAnalyst/Dashboard/DataAnalystDashboard";
+import SuperAdminDashboard from "./superadmin/SuperAdminDashboard";
 import ProposedCalendar from "./coord/ProposedCalendar";
 import ProposeNewEventForm from "./coord/components/ProposeNewEventForm";
 import PastEvents from "./coord/components/PastEvents";
@@ -49,6 +50,7 @@ function AppContent() {
   const [isProfessional, setIsProfessional] = useState(false);
   const [isCommunity, setIsCommunity] = useState(false);
   const [isDataAnalyst, setIsDataAnalyst] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [user, setUser] = useState([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -69,6 +71,7 @@ function AppContent() {
     setIsProfessional(getUser?.role_name === "Professional Society");
     setIsCommunity(getUser?.role_name === "Community");
     setIsDataAnalyst(getUser?.role_name === "Data Analyst" || getUser?.role_name === "Data analyst");
+    setIsSuperAdmin(getUser?.role_name === "Super Admin");
   }, []);
 
   useEffect(() => {
@@ -119,6 +122,7 @@ function AppContent() {
 
   // Determine the home dashboard route based on role
   const homeDashboardRoute = () => {
+    if (isSuperAdmin) return "/super-admin-dashboard";
     if (isDataAnalyst) return "/data-analyst-dashboard";
     if (isDepartment) return "/department-dashboard";
     if (isProfessional) return "/professional-dashboard";
@@ -127,6 +131,18 @@ function AppContent() {
   };
 
   const isEntityUser = isClub || isDepartment || isProfessional || isCommunity || isDataAnalyst;
+  // Super Admin has its own layout (no shared sidebar/topbar)
+
+  // Super Admin full-page bypass
+  if (isSuperAdmin && isLoggedIn && location.pathname === '/super-admin-dashboard') {
+    return (
+      <SuperAdminDashboard
+        onLogout={handleLogout}
+        theme={theme}
+        toggleTheme={toggleTheme}
+      />
+    );
+  }
 
   return (
     <div className="app-container">
@@ -247,6 +263,14 @@ function AppContent() {
               element={
                 <ProtectedRoute allowedRoles={["Club", "Department", "Professional Society", "Community", "Data Analyst", "Data analyst"]} user={user}>
                   <Settings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/super-admin-dashboard"
+              element={
+                <ProtectedRoute allowedRoles={["Super Admin"]} user={user}>
+                  <SuperAdminDashboard onLogout={handleLogout} theme={theme} toggleTheme={toggleTheme} />
                 </ProtectedRoute>
               }
             />

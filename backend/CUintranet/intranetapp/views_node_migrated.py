@@ -1920,3 +1920,184 @@ def change_password(request):
         return JsonResponse({'success': False, 'message': f'Server error: {str(e)}'}, status=500)
 
 
+
+
+# ============================================================
+#  SUPER ADMIN ENDPOINTS
+# ============================================================
+
+@csrf_exempt
+def superadmin_stats(request):
+    """Aggregate KPI statistics for the Super Admin dashboard."""
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT COUNT(*) FROM Clubs")
+            total_clubs = cursor.fetchone()[0]
+            cursor.execute("SELECT COUNT(*) FROM departments")
+            total_depts = cursor.fetchone()[0]
+            cursor.execute("SELECT COUNT(*) FROM professional_societies")
+            total_prof = cursor.fetchone()[0]
+            cursor.execute("SELECT COUNT(*) FROM communities")
+            total_comm = cursor.fetchone()[0]
+
+            cursor.execute("SELECT COALESCE(SUM(approved_budget),0), COALESCE(SUM(spent_budget),0) FROM Clubs")
+            r = cursor.fetchone(); club_approved, club_spent = float(r[0]), float(r[1])
+            cursor.execute("SELECT COALESCE(SUM(approved_budget),0), COALESCE(SUM(spent_budget),0) FROM departments")
+            r = cursor.fetchone(); dept_approved, dept_spent = float(r[0]), float(r[1])
+            cursor.execute("SELECT COALESCE(SUM(approved_budget),0), COALESCE(SUM(spent_budget),0) FROM professional_societies")
+            r = cursor.fetchone(); prof_approved, prof_spent = float(r[0]), float(r[1])
+            cursor.execute("SELECT COALESCE(SUM(approved_budget),0), COALESCE(SUM(spent_budget),0) FROM communities")
+            r = cursor.fetchone(); comm_approved, comm_spent = float(r[0]), float(r[1])
+
+        total_approved = club_approved + dept_approved + prof_approved + comm_approved
+        total_spent = club_spent + dept_spent + prof_spent + comm_spent
+
+        events_data = []
+        try:
+            raw = get_sheet_data(SPREADSHEET_ID, "CLUBS")
+            events_data.extend(raw or [])
+            dept_raw = get_sheet_data(SPREADSHEET_ID, "DEPT SOCIETIES")
+            events_data.extend(dept_raw or [])
+        except Exception:
+            pass
+
+        total_events = len(events_data)
+        status_counts = {}
+        event_type_counts = {}
+        entity_event_counts = {}
+        for ev in events_data:
+            status = (ev.get("STATUS OF ACTIVITY/EVENT") or ev.get("STATUS") or "Pending").strip()
+            status_counts[status] = status_counts.get(status, 0) + 1
+            etype = (ev.get("Type of Event") or ev.get("EVENT TYPE") or "Other").strip()
+            event_type_counts[etype] = event_type_counts.get(etype, 0) + 1
+            entity = (ev.get("Club Name") or ev.get("CLUB NAME") or "Unknown").strip()
+            entity_event_counts[entity] = entity_event_counts.get(entity, 0) + 1
+
+        return JsonResponse({
+            "entities": {
+                "clubs": total_clubs, "departments": total_depts,
+                "professional_societies": total_prof, "communities": total_comm,
+                "total": total_clubs + total_depts + total_prof + total_comm
+            },
+            "budget": {
+                "total_approved": total_approved, "total_spent": total_spent,
+                "utilization_pct": round((total_spent / total_approved * 100) if total_approved else 0, 1),
+                "by_type": {
+                    "Club": {"approved": club_approved, "spent": club_spent},
+                    "Department": {"approved": dept_approved, "spent": dept_spent},
+                    "Professional Society": {"approved": prof_approved, "spent": prof_spent},
+                    "Community": {"approved": comm_approved, "spent": comm_spent}
+                }
+            },
+            "events": {
+                "total": total_events,
+                "by_status": status_counts,
+                "by_type": event_type_counts,
+                "by_entity": dict(sorted(entity_event_counts.items(), key=lambda x: -x[1])[:15])
+            }
+        })
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+@csrf_exempt
+def superadmin_events(request):
+    """All events with filters."""
+    try:
+        entity_type = request.GET.get("entity_type", "")
+        status_filter = request.GET.get("status", "")
+        search = request.GET.get("search", "").lower()
+        page = int(request.GET.get("page", 1))
+        page_size = int(request.GET.get("page_size", 50))
+
+        all_events = []
+        sheets = []
+        if not entity_type or entity_type == "Club":
+            sheets.append(("CLUBS", "Club"))
+        if not entity_type or entity_type == "Department":
+            sheets.append(("DEPT SOCIETIES", "Department"))
+
+        for sheet_name, etype in sheets:
+            try:
+                rows = get_sheet_data(SPREADSHEET_ID, sheet_name) or []
+                for row in rows:
+                    row["_entity_type"] = etype
+                    all_events.append(row)
+            except Exception:
+                pass
+
+        filtered = []
+        for ev in all_events:
+            s = (ev.get("STATUS OF ACTIVITY/EVENT") or ev.get("STATUS") or "").strip()
+            if status_filter and status_filter.lower() not in s.lower():
+                continue
+            if search:
+                searchable = " ".join([str(v) for v in ev.values()]).lower()
+                if search not in searchable:
+                    continue
+            filtered.append(ev)
+
+        total = len(filtered)
+        start = (page - 1) * page_size
+        return JsonResponse({"total": total, "page": page, "page_size": page_size, "events": filtered[start:start + page_size]})
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+@csrf_exempt
+def superadmin_entities(request):
+    """All entity users with full details."""
+    try:
+        entity_type = request.GET.get("type", "")
+        search = request.GET.get("search", "").lower()
+        all_entities = []
+        with connection.cursor() as cursor:
+            if not entity_type or entity_type == "Club":
+                cursor.execute("SELECT registration_code, registration_name, faculty_champion, employee_id, contact_number, email_id, cluster_department, secretary, sec_uid, secretary_email, secretary_contact, login_id, COALESCE(approved_budget,0), COALESCE(spent_budget,0) FROM Clubs ORDER BY registration_name")
+                for row in cursor.fetchall():
+                    approved, spent = float(row[12]), float(row[13])
+                    all_entities.append({"type": "Club", "registration_code": row[0], "name": row[1], "faculty_champion": row[2], "employee_id": row[3], "contact_number": row[4], "email": row[5], "cluster": row[6], "secretary": row[7], "sec_uid": row[8], "secretary_email": row[9], "secretary_contact": row[10], "login_id": row[11], "approved_budget": approved, "spent_budget": spent, "balance_budget": round(approved - spent, 2)})
+            if not entity_type or entity_type == "Department":
+                cursor.execute("SELECT dept_id, name, login_id, COALESCE(approved_budget,0), COALESCE(spent_budget,0) FROM departments ORDER BY name")
+                for row in cursor.fetchall():
+                    approved, spent = float(row[3]), float(row[4])
+                    all_entities.append({"type": "Department", "registration_code": row[0], "name": row[1], "login_id": row[2], "approved_budget": approved, "spent_budget": spent, "balance_budget": round(approved - spent, 2), "faculty_champion": "", "contact_number": "", "email": "", "cluster": "", "secretary": "", "sec_uid": "", "secretary_email": "", "secretary_contact": "", "employee_id": ""})
+            if not entity_type or entity_type == "Professional Society":
+                cursor.execute("SELECT prof_soc_id, name, login_id, COALESCE(approved_budget,0), COALESCE(spent_budget,0) FROM professional_societies ORDER BY name")
+                for row in cursor.fetchall():
+                    approved, spent = float(row[3]), float(row[4])
+                    all_entities.append({"type": "Professional Society", "registration_code": row[0], "name": row[1], "login_id": row[2], "approved_budget": approved, "spent_budget": spent, "balance_budget": round(approved - spent, 2), "faculty_champion": "", "contact_number": "", "email": "", "cluster": "", "secretary": "", "sec_uid": "", "secretary_email": "", "secretary_contact": "", "employee_id": ""})
+            if not entity_type or entity_type == "Community":
+                cursor.execute("SELECT comm_id, name, login_id, COALESCE(approved_budget,0), COALESCE(spent_budget,0) FROM communities ORDER BY name")
+                for row in cursor.fetchall():
+                    approved, spent = float(row[3]), float(row[4])
+                    all_entities.append({"type": "Community", "registration_code": row[0], "name": row[1], "login_id": row[2], "approved_budget": approved, "spent_budget": spent, "balance_budget": round(approved - spent, 2), "faculty_champion": "", "contact_number": "", "email": "", "cluster": "", "secretary": "", "sec_uid": "", "secretary_email": "", "secretary_contact": "", "employee_id": ""})
+
+        if search:
+            all_entities = [e for e in all_entities if search in " ".join(str(v) for v in e.values()).lower()]
+        return JsonResponse({"entities": all_entities, "total": len(all_entities)})
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+@csrf_exempt
+def superadmin_budget(request):
+    """Per-entity budget breakdown for charts."""
+    try:
+        all_data = []
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT registration_name, COALESCE(approved_budget,0), COALESCE(spent_budget,0) FROM Clubs WHERE COALESCE(approved_budget,0) > 0 ORDER BY approved_budget DESC LIMIT 25")
+            for row in cursor.fetchall():
+                all_data.append({"name": row[0], "type": "Club", "approved": float(row[1]), "spent": float(row[2]), "balance": round(float(row[1])-float(row[2]),2)})
+            cursor.execute("SELECT name, COALESCE(approved_budget,0), COALESCE(spent_budget,0) FROM departments WHERE COALESCE(approved_budget,0) > 0 ORDER BY approved_budget DESC LIMIT 15")
+            for row in cursor.fetchall():
+                all_data.append({"name": row[0], "type": "Department", "approved": float(row[1]), "spent": float(row[2]), "balance": round(float(row[1])-float(row[2]),2)})
+            cursor.execute("SELECT name, COALESCE(approved_budget,0), COALESCE(spent_budget,0) FROM professional_societies WHERE COALESCE(approved_budget,0) > 0 ORDER BY approved_budget DESC")
+            for row in cursor.fetchall():
+                all_data.append({"name": row[0], "type": "Professional Society", "approved": float(row[1]), "spent": float(row[2]), "balance": round(float(row[1])-float(row[2]),2)})
+            cursor.execute("SELECT name, COALESCE(approved_budget,0), COALESCE(spent_budget,0) FROM communities WHERE COALESCE(approved_budget,0) > 0 ORDER BY approved_budget DESC")
+            for row in cursor.fetchall():
+                all_data.append({"name": row[0], "type": "Community", "approved": float(row[1]), "spent": float(row[2]), "balance": round(float(row[1])-float(row[2]),2)})
+        return JsonResponse({"budget_data": all_data})
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)

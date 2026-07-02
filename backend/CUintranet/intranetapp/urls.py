@@ -38,4 +38,9 @@ urlpatterns = [
     path('api/update-activity-id', views_node_migrated.update_activity_id),
     path('api/cache/clear', views_node_migrated.cache_clear),
     path('api/auth/change-password', views_node_migrated.change_password),
+    # Super Admin endpoints
+    path('api/superadmin/stats', views_node_migrated.superadmin_stats),
+    path('api/superadmin/events', views_node_migrated.superadmin_events),
+    path('api/superadmin/entities', views_node_migrated.superadmin_entities),
+    path('api/superadmin/budget', views_node_migrated.superadmin_budget),
 ]
