@@ -80,32 +80,51 @@ const Login = ({ onLogin, theme, toggleTheme }) => {
     setIsLoading(true);
 
     try {
-      let response;
       const lowerEmail = email.toLowerCase();
-      
-      if (lowerEmail.endsWith("@cu")) {
-          const res = await fetch(`${API_BASE}/api/auth/club-login`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email: lowerEmail, password })
-          });
-          if (!res.ok) {
-              const errData = await res.json();
-              throw { response: { data: { message: errData.message || errData.error }, status: res.status } };
-          }
-          const data = await res.json();
-          response = { data };
-      } else {
-          response = await apiClient.post("login/", {
-              user_email: lowerEmail,
-              password: password,
-          });
+      let data = null;
+      let loginSuccess = false;
+
+      // 1. Try DB-based login first (Clubs, Departments, Prof Societies, Communities, Super Admin, Data Analyst)
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/club-login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: lowerEmail, password })
+        });
+        if (res.ok) {
+            const resData = await res.json();
+            if (resData.success) {
+                data = resData;
+                loginSuccess = true;
+            }
+        }
+      } catch (dbErr) {
+        console.warn("DB login attempt failed, trying sheets fallback...", dbErr);
       }
 
-      const data = response?.data;
-      if (data) {
-        data.login_id = lowerEmail;
-        data.email = lowerEmail;
+      // 2. If DB login failed, fallback to Sheets-based login (Admin, CFC, Secretaries, General)
+      if (!loginSuccess) {
+        const res = await fetch(`${API_BASE}/api/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: lowerEmail, password })
+        });
+        if (!res.ok) {
+            const errData = await res.json();
+            throw { response: { data: { message: errData.message || errData.error }, status: res.status } };
+        }
+        const resData = await res.json();
+        if (!resData.success) {
+            throw { response: { data: { message: resData.message || 'Invalid credentials' } } };
+        }
+        data = resData;
+      }
+
+      // Ensure login_id, email, and role_name are standardized in stored user object
+      data.login_id = lowerEmail;
+      data.email    = lowerEmail;
+      if (!data.role_name && data.role) {
+          data.role_name = data.role;
       }
       localStorage.setItem("user", JSON.stringify(data));
 
@@ -113,7 +132,7 @@ const Login = ({ onLogin, theme, toggleTheme }) => {
 
       setTimeout(() => {
         onLogin();
-        const role = data?.role_name;
+        const role = data?.role_name || data?.role;
         if (role === "Club") {
           window.location.href = "/club-dashboard";
         } else if (role === "Department") {
@@ -124,6 +143,8 @@ const Login = ({ onLogin, theme, toggleTheme }) => {
           window.location.href = "/community-dashboard";
         } else if (role === "Data Analyst" || role === "Data analyst") {
           window.location.href = "/data-analyst-dashboard";
+        } else if (role === "Super Admin") {
+          window.location.href = "/super-admin-dashboard";
         } else {
           window.location.href = "/club-dashboard"; 
         }
