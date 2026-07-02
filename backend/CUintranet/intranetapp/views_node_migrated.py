@@ -574,17 +574,36 @@ def update_budget(request):
         if not registration_code:
             return JsonResponse({'error': 'Registration code required'}, status=400)
             
-        table_name = 'Clubs'
-        id_field = 'registration_code'
-        if registration_code.startswith('CU2026/DEPT/'):
-            table_name = 'departments'
-            id_field = 'dept_id'
-        elif registration_code.startswith('CU2026/PROF/'):
-            table_name = 'professional_societies'
-            id_field = 'prof_soc_id'
-        elif registration_code.startswith('CU2026/COMM/'):
-            table_name = 'communities'
-            id_field = 'comm_id'
+        table_name = None
+        id_field = None
+        
+        with connection.cursor() as cursor:
+            # 1. Try Clubs
+            cursor.execute("SELECT 1 FROM Clubs WHERE registration_code = %s", [registration_code])
+            if cursor.fetchone():
+                table_name = 'Clubs'
+                id_field = 'registration_code'
+            else:
+                # 2. Try departments
+                cursor.execute("SELECT 1 FROM departments WHERE dept_id = %s", [registration_code])
+                if cursor.fetchone():
+                    table_name = 'departments'
+                    id_field = 'dept_id'
+                else:
+                    # 3. Try professional_societies
+                    cursor.execute("SELECT 1 FROM professional_societies WHERE prof_soc_id = %s", [registration_code])
+                    if cursor.fetchone():
+                        table_name = 'professional_societies'
+                        id_field = 'prof_soc_id'
+                    else:
+                        # 4. Try communities
+                        cursor.execute("SELECT 1 FROM communities WHERE comm_id = %s", [registration_code])
+                        if cursor.fetchone():
+                            table_name = 'communities'
+                            id_field = 'comm_id'
+                            
+        if not table_name:
+            return JsonResponse({'error': f'Entity registration code {registration_code} not found in database'}, status=404)
             
         with connection.cursor() as cursor:
             cursor.execute(f"SELECT approved_budget, spent_budget FROM {table_name} WHERE {id_field} = %s", [registration_code])
@@ -594,7 +613,18 @@ def update_budget(request):
                 
             current_approved = row[0]
             new_approved_budget = current_approved
-            if (current_approved is None or current_approved == '') and approved_budget is not None:
+            
+            is_not_set = False
+            if current_approved is None or current_approved == '':
+                is_not_set = True
+            else:
+                try:
+                    if float(current_approved) == 0.0:
+                        is_not_set = True
+                except ValueError:
+                    is_not_set = True
+                    
+            if is_not_set and approved_budget is not None:
                 try:
                     new_approved_budget = float(approved_budget)
                 except ValueError:

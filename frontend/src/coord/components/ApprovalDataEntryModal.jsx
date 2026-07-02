@@ -89,9 +89,9 @@ const ApprovalDataEntryModal = ({ event, clubRecord, role, onClose, onPreviewPdf
                 entryGuestSubject: '',
                 entrySection: '',
 
-                entryBudgApproved: clubRecord?.approved_budget != null && clubRecord?.approved_budget !== '' ? String(clubRecord.approved_budget) : '',
+                entryBudgApproved: clubRecord?.approved_budget != null && clubRecord?.approved_budget !== '' && parseFloat(clubRecord.approved_budget) > 0 ? String(clubRecord.approved_budget) : '',
                 entryBudgUsed: clubRecord?.spent_budget !== null && clubRecord?.spent_budget !== undefined ? String(clubRecord.spent_budget) : '0',
-                entryBudgBalance: clubRecord?.approved_budget ? String(parseFloat(clubRecord.approved_budget) - parseFloat(clubRecord.spent_budget || 0)) : '',
+                entryBudgBalance: clubRecord?.approved_budget && parseFloat(clubRecord.approved_budget) > 0 ? String(parseFloat(clubRecord.approved_budget) - parseFloat(clubRecord.spent_budget || 0)) : '',
                 entryBudgSponsor: isSponsorTBD ? '' : sponsorStr,
                 entryBudgRequired: event['Mention Proposed Budget [ in Numbers]'] || event['BUDGET USED'] || '',
 
@@ -457,7 +457,7 @@ const ApprovalDataEntryModal = ({ event, clubRecord, role, onClose, onPreviewPdf
                             name="entryBudgApproved" 
                             value={formData.entryBudgApproved || ''} 
                             onChange={handleChange} 
-                            readOnly={clubRecord?.approved_budget != null && clubRecord?.approved_budget !== ''}
+                            readOnly={clubRecord?.approved_budget != null && clubRecord?.approved_budget !== '' && parseFloat(clubRecord.approved_budget) > 0}
                         />
                     </div>
                     <div className={styles.formGroup}>
