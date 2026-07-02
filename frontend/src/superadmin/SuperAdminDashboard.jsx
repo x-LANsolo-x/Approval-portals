@@ -5,7 +5,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 
-const API = import.meta.env.VITE_API_URL || 'https://approval-portals.onrender.com';
+import { API_BASE } from '../config/apiClient';
 
 const CHART_COLORS = ['#ffffff','#a1a1aa','#71717a','#52525b','#3f3f46','#27272a'];
 const TYPE_COLORS  = { Club:'#ffffff', Department:'#a1a1aa', 'Professional Society':'#71717a', Community:'#52525b' };
@@ -143,7 +143,7 @@ function EventsTab() {
       if (search)     params.append('search', search);
       if (entityType) params.append('entity_type', entityType);
       if (status)     params.append('status', status);
-      const res  = await fetch(`${API}/api/superadmin/events?${params}`);
+      const res  = await fetch(`${API_BASE}/api/superadmin/events?${params}`);
       const data = await res.json();
       setEvents(data.events || []);
       setTotal(data.total || 0);
@@ -190,8 +190,8 @@ function EventsTab() {
                 ) : events.map((ev,i) => {
                   const name   = ev['Club Name'] || ev['CLUB NAME'] || '—';
                   const evName = ev['Event Name'] || ev['EVENT NAME'] || ev['Name of the Event/Activity'] || '—';
-                  const type   = ev['Type of Event'] || ev['EVENT TYPE'] || '—';
-                  const date   = ev['Date & Time of Activity/Event'] || ev['Date'] || '—';
+                  const type   = ev['Type of Activity'] || ev['Type of Event'] || ev['EVENT TYPE'] || ev['Type of Event/Activity'] || ev['TYPE OF EVENT/ACTIVITY'] || '—';
+                  const date   = ev['Prposed Start Date'] || ev['Proposed Date'] || ev['PROPOSED DATE'] || ev['Date & Time of Activity/Event'] || ev['Date'] || '—';
                   const s      = ev['STATUS OF ACTIVITY/EVENT'] || ev['STATUS'] || 'Pending';
                   const eType  = ev['_entity_type'] || '—';
                   return (
@@ -233,7 +233,7 @@ function EntitiesTab() {
       const params = new URLSearchParams();
       if (search)     params.append('search', search);
       if (typeFilter) params.append('type', typeFilter);
-      const res  = await fetch(`${API}/api/superadmin/entities?${params}`);
+      const res  = await fetch(`${API_BASE}/api/superadmin/entities?${params}`);
       const data = await res.json();
       setEntities(data.entities || []);
       setTotal(data.total || 0);
@@ -307,7 +307,7 @@ function BudgetTab() {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`${API}/api/superadmin/budget`)
+    fetch(`${API_BASE}/api/superadmin/budget`)
       .then(r=>r.json())
       .then(d=>setData(d.budget_data||[]))
       .catch(console.error)
@@ -408,7 +408,7 @@ function UsersTab() {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`${API}/api/superadmin/users`)
+    fetch(`${API_BASE}/api/superadmin/users`)
       .then(r => r.json())
       .then(d => setUsers(d.users || []))
       .catch(console.error)
@@ -528,7 +528,7 @@ export default function SuperAdminDashboard({ onLogout, theme, toggleTheme }) {
 
   useEffect(() => {
     setStatsLoading(true);
-    fetch(`${API}/api/superadmin/stats`)
+    fetch(`${API_BASE}/api/superadmin/stats`)
       .then(r=>r.json())
       .then(setStats)
       .catch(console.error)

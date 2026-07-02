@@ -1196,75 +1196,81 @@ def events(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
+def _get_all_events_parsed():
+    master_id = '1FYfZH967DNvITrjE_entuSmJarJvfAYJSsnxvpWqGyQ'
+    clubs_rows = _cached_sheet(master_id, 'CLUBS')
+    depts_rows = _cached_sheet(master_id, 'DEPT SOCIETIES')
+    prof_rows  = _cached_sheet(master_id, 'PROF. SOCIETIES')
+    comm_rows  = _cached_sheet(master_id, 'COMMUNITIES')
+
+    all_events = []
+
+    # ── CLUBS: row 0 = filler/title, row 1 = headers, rows 2+ = data ──
+    if clubs_rows and len(clubs_rows) >= 3:
+        headers = [h.strip() for h in clubs_rows[1]]
+        last_seen = {}
+        for row in clubs_rows[2:]:
+            obj = {}
+            for i, header in enumerate(headers):
+                val = row[i].strip() if i < len(row) and row[i] else ''
+                if header.lower() in ['club name', 'entity name', 'department']:
+                    if val: last_seen[header] = val
+                    elif header in last_seen: val = last_seen[header]
+                obj[header] = val
+            obj['EntityType'] = 'Club'
+            obj['_entity_type'] = 'Club'
+            obj['STATUS OF ACTIVITY/EVENT'] = obj.get('STATUS OF ACTIVITY/EVENT', '')
+            if obj.get('Event Name', '').strip():
+                all_events.append(obj)
+
+    # ── Generic helper for DEPT, PROF, COMMUNITIES (all row-0 headers) ──
+    def parse_sheet(rows, entity_type):
+        if not rows or len(rows) < 2:
+            return
+        headers = [h.strip() for h in rows[0]]
+        last_seen = {}
+        # Normalised-key → canonical display key
+        rename = {
+            'EVENT NAME':                      'Event Name',
+            'EVENT NAME ':                     'Event Name',
+            'TYPE OF EVENT/ACTIVITY':          'Type of Activity',
+            'LEVEL OF EVENT/ACTIVITY':         'Event/activity Type',
+            'LEVEL OF EVENT':                  'Event/activity Type',
+            'PROPOSED DATE':                   'Proposed Date',
+            'BUDGET USED':                     'Mention Proposed Budget [ in Numbers]',
+            'VENUE':                           'Proposed Venue',
+            'DEPARTMENT':                      'Club Name',
+            'STATUS OF ACTIVITY/EVENT':        'STATUS OF ACTIVITY/EVENT',
+            'OUTCOME OF ACTIVITY':             'Briefly elaborate about the outcome of the event',
+            'CATEGORY OF ACTIVITY':            'Type of Activity',
+            'DESCRIPTION (MINIMUM IN 100 WORDS)': 'Descrptions',
+        }
+        for row in rows[1:]:
+            obj = {}
+            for i, header in enumerate(headers):
+                val = row[i].strip() if i < len(row) and row[i] else ''
+                key_up = header.upper()
+                if header.lower() in ['department', 'entity name', 'club name']:
+                    if val: last_seen[header] = val
+                    elif header in last_seen: val = last_seen[header]
+                canonical = rename.get(key_up)
+                if canonical:
+                    obj[canonical] = val
+                obj[header] = val  # also keep raw key
+            obj['EntityType'] = entity_type
+            obj['_entity_type'] = entity_type
+            if obj.get('Event Name', '').strip():
+                all_events.append(obj)
+
+    parse_sheet(depts_rows, 'Department')
+    parse_sheet(prof_rows,  'Professional Society')
+    parse_sheet(comm_rows,  'Community')
+
+    return all_events
+
 def all_proposed_calendar(request):
     try:
-        master_id = '1FYfZH967DNvITrjE_entuSmJarJvfAYJSsnxvpWqGyQ'
-        clubs_rows = _cached_sheet(master_id, 'CLUBS')
-        depts_rows = _cached_sheet(master_id, 'DEPT SOCIETIES')
-        prof_rows  = _cached_sheet(master_id, 'PROF. SOCIETIES')
-        comm_rows  = _cached_sheet(master_id, 'COMMUNITIES')
-
-        all_events = []
-
-        # ── CLUBS: row 0 = filler/title, row 1 = headers, rows 2+ = data ──
-        if clubs_rows and len(clubs_rows) >= 3:
-            headers = [h.strip() for h in clubs_rows[1]]
-            last_seen = {}
-            for row in clubs_rows[2:]:
-                obj = {}
-                for i, header in enumerate(headers):
-                    val = row[i].strip() if i < len(row) and row[i] else ''
-                    if header.lower() in ['club name', 'entity name', 'department']:
-                        if val: last_seen[header] = val
-                        elif header in last_seen: val = last_seen[header]
-                    obj[header] = val
-                obj['EntityType'] = 'Club'
-                obj['STATUS OF ACTIVITY/EVENT'] = obj.get('STATUS OF ACTIVITY/EVENT', '')
-                if obj.get('Event Name', '').strip():
-                    all_events.append(obj)
-
-        # ── Generic helper for DEPT, PROF, COMMUNITIES (all row-0 headers) ──
-        def parse_sheet(rows, entity_type):
-            if not rows or len(rows) < 2:
-                return
-            headers = [h.strip() for h in rows[0]]
-            last_seen = {}
-            # Normalised-key → canonical display key
-            rename = {
-                'EVENT NAME':                      'Event Name',
-                'EVENT NAME ':                     'Event Name',
-                'TYPE OF EVENT/ACTIVITY':          'Type of Activity',
-                'LEVEL OF EVENT/ACTIVITY':         'Event/activity Type',
-                'LEVEL OF EVENT':                  'Event/activity Type',
-                'PROPOSED DATE':                   'Proposed Date',
-                'BUDGET USED':                     'Mention Proposed Budget [ in Numbers]',
-                'VENUE':                           'Proposed Venue',
-                'DEPARTMENT':                      'Club Name',
-                'STATUS OF ACTIVITY/EVENT':        'STATUS OF ACTIVITY/EVENT',
-                'OUTCOME OF ACTIVITY':             'Briefly elaborate about the outcome of the event',
-                'CATEGORY OF ACTIVITY':            'Type of Activity',
-                'DESCRIPTION (MINIMUM IN 100 WORDS)': 'Descrptions',
-            }
-            for row in rows[1:]:
-                obj = {}
-                for i, header in enumerate(headers):
-                    val = row[i].strip() if i < len(row) and row[i] else ''
-                    key_up = header.upper()
-                    if header.lower() in ['department', 'entity name', 'club name']:
-                        if val: last_seen[header] = val
-                        elif header in last_seen: val = last_seen[header]
-                    canonical = rename.get(key_up)
-                    if canonical:
-                        obj[canonical] = val
-                    obj[header] = val  # also keep raw key
-                obj['EntityType'] = entity_type
-                if obj.get('Event Name', '').strip():
-                    all_events.append(obj)
-
-        parse_sheet(depts_rows, 'Department')
-        parse_sheet(prof_rows,  'Professional Society')
-        parse_sheet(comm_rows,  'Community')
-
+        all_events = _get_all_events_parsed()
         return JsonResponse({'events': all_events})
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
@@ -1952,14 +1958,7 @@ def superadmin_stats(request):
         total_approved = club_approved + dept_approved + prof_approved + comm_approved
         total_spent = club_spent + dept_spent + prof_spent + comm_spent
 
-        events_data = []
-        try:
-            raw = get_sheet_data(SPREADSHEET_ID, "CLUBS")
-            events_data.extend(raw or [])
-            dept_raw = get_sheet_data(SPREADSHEET_ID, "DEPT SOCIETIES")
-            events_data.extend(dept_raw or [])
-        except Exception:
-            pass
+        events_data = _get_all_events_parsed()
 
         total_events = len(events_data)
         status_counts = {}
@@ -1968,7 +1967,7 @@ def superadmin_stats(request):
         for ev in events_data:
             status = (ev.get("STATUS OF ACTIVITY/EVENT") or ev.get("STATUS") or "Pending").strip()
             status_counts[status] = status_counts.get(status, 0) + 1
-            etype = (ev.get("Type of Event") or ev.get("EVENT TYPE") or "Other").strip()
+            etype = (ev.get("Type of Activity") or ev.get("Type of Event") or ev.get("EVENT TYPE") or "Other").strip()
             event_type_counts[etype] = event_type_counts.get(etype, 0) + 1
             entity = (ev.get("Club Name") or ev.get("CLUB NAME") or "Unknown").strip()
             entity_event_counts[entity] = entity_event_counts.get(entity, 0) + 1
@@ -2010,24 +2009,13 @@ def superadmin_events(request):
         page = int(request.GET.get("page", 1))
         page_size = int(request.GET.get("page_size", 50))
 
-        all_events = []
-        sheets = []
-        if not entity_type or entity_type == "Club":
-            sheets.append(("CLUBS", "Club"))
-        if not entity_type or entity_type == "Department":
-            sheets.append(("DEPT SOCIETIES", "Department"))
-
-        for sheet_name, etype in sheets:
-            try:
-                rows = get_sheet_data(SPREADSHEET_ID, sheet_name) or []
-                for row in rows:
-                    row["_entity_type"] = etype
-                    all_events.append(row)
-            except Exception:
-                pass
+        all_events = _get_all_events_parsed()
 
         filtered = []
         for ev in all_events:
+            etype = ev.get("_entity_type", "")
+            if entity_type and entity_type.lower() != etype.lower():
+                continue
             s = (ev.get("STATUS OF ACTIVITY/EVENT") or ev.get("STATUS") or "").strip()
             if status_filter and status_filter.lower() not in s.lower():
                 continue
