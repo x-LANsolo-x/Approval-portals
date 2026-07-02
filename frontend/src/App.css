@@ -46,37 +46,41 @@
 }
 
 [data-theme="dark"] {
-  /* ── Dark Theme (Strict Monochrome) ── */
-  --bg-main:         #030712;        
-  --bg-sidebar:      #000000;
-  --bg-card:         #0B0F19;
-  --bg-card-2:       #111827;
-  --bg-input:        #000000;
-  --bg-hover:        rgba(255, 255, 255, 0.08);
+  /* ── Dark Theme (Cyber Glassmorphism & Ambient Glow) ── */
+  --bg-main:         #080a10;        
+  --bg-sidebar:      #030508;
+  --bg-card:         rgba(13, 17, 28, 0.75);
+  --bg-card-2:       rgba(22, 28, 45, 0.65);
+  --bg-input:        rgba(6, 8, 14, 0.8);
+  --bg-hover:        rgba(129, 140, 248, 0.15);
 
-  --primary:         #FFFFFF;        
-  --primary-hover:   #E5E7EB;
-  --primary-light:   rgba(255, 255, 255, 0.15);
+  --primary:         #818cf8;        
+  --primary-hover:   #a5b4fc;
+  --primary-light:   rgba(129, 140, 248, 0.25);
 
-  --secondary:       #F9FAFB;        
-  --secondary-hover: #D1D5DB;
-  --secondary-light: rgba(255, 255, 255, 0.1);
+  --secondary:       #c084fc;        
+  --secondary-hover: #d8b4fe;
+  --secondary-light: rgba(192, 132, 252, 0.2);
 
-  --accent:          #9CA3AF;        
-  --accent-light:    rgba(255, 255, 255, 0.1);
+  --accent:          #22d3ee;        
+  --accent-light:    rgba(34, 211, 238, 0.2);
 
-  --text-main:       #FFFFFF;        
-  --text-muted:      #9CA3AF;        
-  --text-sub:        #D1D5DB;
+  --success:         #34d399;
+  --success-light:   rgba(52, 211, 153, 0.2);
+  --warning:         #fbbf24;
 
-  --border-color:    #1F2937;
-  --border-clay:     #1F2937;
+  --text-main:       #f8fafc;        
+  --text-muted:      #94a3b8;        
+  --text-sub:        #cbd5e1;
 
-  --clay-shadow-dark:    0 10px 15px -3px rgba(0, 0, 0, 0.8), 0 4px 6px -2px rgba(0, 0, 0, 0.6);
-  --clay-shadow-primary: 0 10px 15px -3px rgba(0, 0, 0, 0.8), 0 4px 6px -2px rgba(0, 0, 0, 0.6);
-  --clay-shadow-gold:    0 10px 15px -3px rgba(0, 0, 0, 0.8), 0 4px 6px -2px rgba(0, 0, 0, 0.6);
+  --border-color:    rgba(129, 140, 248, 0.15);
+  --border-clay:     rgba(129, 140, 248, 0.2);
 
-  --clay-inset:  none;
+  --clay-shadow-dark:    0 12px 30px -10px rgba(0, 0, 0, 0.7), 0 0 1px 0 rgba(129, 140, 248, 0.15);
+  --clay-shadow-primary: 0 12px 30px -10px rgba(129, 140, 248, 0.15), 0 0 2px 0 rgba(129, 140, 248, 0.3);
+  --clay-shadow-gold:    0 12px 30px -10px rgba(192, 132, 252, 0.15), 0 0 2px 0 rgba(192, 132, 252, 0.3);
+
+  --clay-inset:          inset 0 1px 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 [data-theme="light"] {
@@ -132,9 +136,14 @@ body::before, body::after {
   content: ""; position: fixed; width: 50vw; height: 50vw;
   border-radius: 50%; filter: blur(120px); z-index: -1;
   pointer-events: none; opacity: 0.12;
+  transition: opacity 0.3s ease;
 }
 body::before { background: radial-gradient(circle, var(--primary) 0%, transparent 70%); top: -15%; left: -15%; }
 body::after { background: radial-gradient(circle, var(--secondary) 0%, transparent 70%); bottom: -15%; right: -15%; }
+
+[data-theme="dark"] body::before, [data-theme="dark"] body::after {
+  opacity: 0.22;
+}
 
 /* ── App layout ───────────────────────────────────────────────────────────── */
 .app-container {
@@ -150,15 +159,21 @@ body::after { background: radial-gradient(circle, var(--secondary) 0%, transpare
 .clay-card, .glass-panel {
   background: var(--bg-card); border-radius: var(--clay-radius); border: 2px solid var(--border-clay);
   box-shadow: var(--clay-shadow-dark), var(--clay-inset);
-  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease;
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease, border-color 0.22s ease;
   position: relative;
 }
 .clay-card:hover, .glass-panel:hover {
   transform: translateY(-3px) scale(1.005);
   box-shadow: 6px 10px 0px rgba(180, 60, 30, 0.30), 0 24px 60px rgba(200, 80, 40, 0.14), var(--clay-inset);
 }
+[data-theme="dark"] .clay-card, [data-theme="dark"] .glass-panel {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
 [data-theme="dark"] .clay-card:hover, [data-theme="dark"] .glass-panel:hover {
-  box-shadow: 6px 10px 0px rgba(0,0,0,0.3), 0 24px 60px rgba(0,0,0,0.2), var(--clay-inset);
+  transform: translateY(-4px) scale(1.008);
+  box-shadow: 6px 10px 0px var(--primary-light), 0 20px 45px rgba(0,0,0,0.5), var(--clay-inset);
+  border-color: var(--primary);
 }
 
 .clay-card--red { box-shadow: var(--clay-shadow-primary), var(--clay-inset); }
