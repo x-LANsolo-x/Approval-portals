@@ -159,6 +159,36 @@ def health_check(request):
         'message': 'CU Clubs Backend (Django Migrated) is running and ready to connect to Google Sheets.'
     })
 
+@csrf_exempt
+def debug_sheets(request):
+    """Temporary debug endpoint — tests if Google Sheets credentials are working on Render."""
+    import os
+    import traceback
+    result = {
+        'GOOGLE_CREDENTIALS_JSON_set': bool(os.environ.get('GOOGLE_CREDENTIALS_JSON')),
+        'credentials_file_exists': False,
+        'sheets_test': None,
+        'error': None,
+    }
+    try:
+        creds_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+            'credentials.json'
+        )
+        result['credentials_file_exists'] = os.path.exists(creds_path)
+    except Exception:
+        pass
+    try:
+        from .google_sheets_utils import get_gspread_client
+        client = get_gspread_client()
+        # Try opening one known spreadsheet
+        sh = client.open_by_key('1FYfZH967DNvITrjE_entuSmJarJvfAYJSsnxvpWqGyQ')
+        ws_names = [ws.title for ws in sh.worksheets()]
+        result['sheets_test'] = f"OK — worksheets: {ws_names[:5]}"
+    except Exception as e:
+        result['error'] = traceback.format_exc()
+    return JsonResponse(result)
+
 # --- SQLite Endpoints ---
 
 @csrf_exempt

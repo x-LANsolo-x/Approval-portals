@@ -11,6 +11,7 @@ urlpatterns = [
 
     # --- Migrated Node.js Endpoints ---
     path('api/health', views_node_migrated.health_check),
+    path('api/debug-sheets', views_node_migrated.debug_sheets),
     path('api/data/<str:sheet_name>', views_node_migrated.data_sheet),
     path('api/events', views_node_migrated.events),
     path('api/all-proposed-calendar', views_node_migrated.all_proposed_calendar),
