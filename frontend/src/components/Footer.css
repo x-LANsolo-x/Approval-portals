@@ -1,0 +1,121 @@
+.footer {
+    /* position: fixed; */
+    bottom: -100px;
+    left: 0;
+    right: 0;
+    padding: 20px 0;
+    transition: bottom 0.3s ease-in-out;
+    z-index: 1000;
+  }
+  
+  .footer.visible {
+    bottom: 0;
+  }
+  
+  .footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+  }
+  
+  .footer p {
+    margin: 0;
+    font-size: 14px;
+  }
+  
+  .footer nav {
+    display: flex;
+    gap: 20px;
+  }
+  
+  .footer a {
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.2s ease-in-out;
+  }
+  
+  /* Default theme */
+  .footer.theme-default {
+    background-color: #2c3e50;
+    color: #ecf0f1;
+  }
+  
+  .footer.theme-default a {
+    color: #ecf0f1;
+  }
+  
+  .footer.theme-default a:hover {
+    color: #000000;
+  }
+  
+  /* Light theme */
+  .footer.theme-clubTheme {
+    background: linear-gradient(45deg, #e55d0e, #c97e5a) !important;
+    color: #000000;
+  }
+  
+  .footer.theme-light a {
+    color: #000000;
+  }
+  
+  .footer.theme-light a:hover {
+    color: #202020;
+  }
+  
+  /* Dark theme */
+  .footer.theme-commTheme {
+    background: linear-gradient(to right, #c182d1, #e4bfee) !important;
+    color: #000000;
+  }
+  
+  .footer.theme-dark a {
+    color: #000000;
+  }
+  
+  .footer.theme-dark a:hover {
+    color: #000000;
+  }
+  
+
+  /* theme for dept  */
+  .footer.theme-deptTheme {
+    background: linear-gradient(to right, #599ee4, #97bfe7) !important;
+    color: #000000;
+  }
+  
+  .footer.theme-dark a {
+    color: #000000;
+  }
+  
+  .footer.theme-dark a:hover {
+    color: #000000;
+  }
+
+  /* theme for chapter  */
+  .footer.theme-chapTheme {
+    background: linear-gradient(to right, #5c833a, #c2ddaa 99%) !important;
+    color: #000000;
+  }
+  
+  .footer.theme-dark a {
+    color: #000000;
+  }
+  
+  .footer.theme-dark a:hover {
+    color: #000000;
+  }
+
+
+  @media (max-width: 768px) {
+    .footer-content {
+      flex-direction: column;
+      text-align: center;
+    }
+  
+    .footer nav {
+      margin-top: 10px;
+    }
+  }

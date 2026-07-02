@@ -1,0 +1,14 @@
+.session-countdown {
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 14px;
+    display: inline-block;
+  }
+  
+  .countdown-timer {
+    font-weight: bold;
+    color: #ff4500;
+  }
+  
+  

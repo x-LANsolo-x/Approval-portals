@@ -1,0 +1,257 @@
+/* ── TopBar — Claymorphism Edition ──────────────────────────────────────── */
+
+.topbarContainer {
+  position: relative;
+  width: 100%;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 0;   /* let main-content-wrapper gap handle spacing */
+}
+
+.topRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  width: 100%;
+}
+
+/* Clay search bar */
+.searchBar {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  max-width: 480px;
+  background: var(--bg-input);
+  border: 2px solid var(--border-clay);
+  border-radius: 16px;
+  padding: 0.3rem 1rem;
+  box-shadow: 2px 3px 0px rgba(0,0,0,0.3), var(--clay-inset);
+  transition: all 0.18s ease;
+}
+
+.searchBar:focus-within {
+  border-color: var(--primary);
+  box-shadow: 2px 3px 0px rgba(200,16,46,0.45), 0 0 0 3px var(--primary-light), var(--clay-inset);
+}
+
+.searchIcon {
+  color: var(--text-muted);
+  font-size: 1.25rem;
+  margin-right: 0.5rem;
+  flex-shrink: 0;
+}
+
+.searchBar input {
+  border: none;
+  background: transparent;
+  padding: 0.55rem 0;
+  width: 100%;
+  color: var(--text-main);
+  box-shadow: none;
+  font-size: 0.95rem;
+}
+
+.searchBar input:focus {
+  box-shadow: none;
+  outline: none;
+}
+
+.widgets {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+/* Clay mega-menu button */
+.megaMenuBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: var(--secondary);
+  color: white;
+  border: 2px solid rgba(0,0,0,0.15);
+  padding: 0.6rem 1.1rem;
+  border-radius: 14px;
+  font-weight: 800;
+  font-size: 0.88rem;
+  cursor: pointer;
+  box-shadow: 3px 4px 0px rgba(0, 30, 90, 0.6), 0 8px 20px rgba(0,48,135,0.25);
+  transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.megaMenuBtn:hover {
+  background: #00246a;
+  transform: translateY(-2px);
+  box-shadow: 5px 7px 0px rgba(0,30,90,0.6), 0 12px 28px rgba(0,48,135,0.3);
+}
+
+.megaMenuBtn.active {
+  background: var(--primary);
+  box-shadow: 3px 4px 0px rgba(165,14,38,0.65), 0 8px 20px rgba(200,16,46,0.3);
+}
+
+.chevron {
+  font-size: 1.05rem;
+  transition: transform 0.2s ease;
+}
+
+.megaMenuBtn.active .chevron {
+  transform: rotate(180deg);
+}
+
+/* Clay icon widget buttons */
+.iconWidget {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  background: var(--bg-card);
+  border: 2px solid var(--border-clay);
+  color: var(--text-main);
+  border-radius: 14px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  position: relative;
+  box-shadow: 2px 3px 0px rgba(0,0,0,0.3), var(--clay-inset);
+  transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.iconWidget:hover {
+  transform: translateY(-2px);
+  box-shadow: 3px 5px 0px rgba(0,0,0,0.35), var(--clay-inset);
+}
+
+.badge {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 8px;
+  height: 8px;
+  background: var(--primary);
+  border-radius: 50%;
+  border: 2px solid var(--bg-card);
+  box-shadow: 1px 1px 0px rgba(165,14,38,0.6);
+}
+
+.userProfile {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding-left: 0.75rem;
+  border-left: 2px solid var(--border-clay);
+}
+
+.profileIcon {
+  font-size: 2.2rem;
+  color: var(--text-muted);
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.userName {
+  font-weight: 800;
+  font-size: 0.9rem;
+  color: var(--text-main);
+  line-height: 1.2;
+}
+
+.userRole {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* ── Mega Menu Dropdown — clay card ────────────────────────────────────── */
+.megaMenu {
+  position: absolute;
+  top: calc(100% + 0.75rem);
+  right: 0;
+  left: 0;
+  background: var(--bg-card);
+  border: 2px solid var(--border-clay);
+  border-radius: var(--clay-radius);
+  padding: 1.75rem;
+  box-shadow:
+    6px 10px 0px rgba(0,0,0,0.45),
+    0 24px 50px rgba(0,0,0,0.25),
+    var(--clay-inset);
+  animation: slideDownMenu 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes slideDownMenu {
+  from { opacity: 0; transform: translateY(-10px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)     scale(1);    }
+}
+
+.megaGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1.5rem;
+}
+
+.megaColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.columnTitle {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0;
+  padding-bottom: 0.35rem;
+  border-bottom: 1.5px solid var(--border-clay);
+}
+
+.columnList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.columnItem {
+  color: var(--text-sub);
+  text-decoration: none;
+  font-size: 0.87rem;
+  font-weight: 500;
+  transition: color 0.15s ease, padding-left 0.15s ease;
+  display: block;
+}
+
+.columnItem:hover {
+  color: var(--primary);
+  padding-left: 5px;
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────────── */
+@media (max-width: 968px) {
+  .topRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .searchBar {
+    max-width: none;
+    order: 2;
+  }
+
+  .widgets {
+    justify-content: space-between;
+    width: 100%;
+    order: 1;
+  }
+}

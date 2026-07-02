@@ -1,0 +1,323 @@
+/* ── Sidebar — Warm Claymorphism ────────────────────────────────────────── */
+
+.mainContainer {
+  display: flex;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  flex-shrink: 0;
+}
+
+.sidebar {
+  width: 72px;
+  height: 100vh;
+  background: var(--bg-sidebar);
+  border-right: 2px solid var(--border-clay);
+  box-shadow:
+    3px 0 0px rgba(180, 60, 30, 0.18),
+    6px 0 20px rgba(200, 80, 40, 0.08);
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+[data-theme="dark"] .sidebar {
+  box-shadow: 3px 0 0px rgba(0, 0, 0, 0.3), 6px 0 20px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar.open {
+  width: 260px;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+.sidebarHeader {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1rem;
+  border-bottom: 2px solid var(--border-clay);
+  min-height: 68px;
+  gap: 0.5rem;
+  box-sizing: border-box;
+  background: var(--bg-sidebar);
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+}
+
+.logoWrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logoIcon {
+  color: var(--primary);
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  filter: drop-shadow(2px 3px 0px rgba(200, 16, 46, 0.4));
+}
+
+.logoText {
+  color: var(--text-main);
+  font-weight: 800;
+  font-size: 1.1rem;
+  white-space: nowrap;
+  letter-spacing: -0.02em;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  overflow: hidden;
+  flex: 1;
+  min-width: 0;
+}
+
+.toggleButton {
+  background: #FFF5F3;
+  border: 2px solid rgba(200, 16, 46, 0.14);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem;
+  border-radius: 10px;
+  box-shadow: 2px 3px 0px rgba(180, 60, 30, 0.20), inset 0 1px 0 rgba(255,255,255,0.9);
+  transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.toggleButton:hover {
+  color: var(--primary);
+  transform: translateY(-1px);
+  box-shadow: 3px 5px 0px rgba(180, 60, 30, 0.25), inset 0 1px 0 rgba(255,255,255,0.9);
+}
+
+.welcomeLabel {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  display: block;
+  line-height: 1.1;
+}
+
+.welcomeName {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+  display: block;
+  line-height: 1.2;
+}
+
+/* ── Nav ─────────────────────────────────────────────────────────────────── */
+.routesContainer {
+  flex: 1;
+  padding: 1rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  overflow-y: auto;
+  background: var(--bg-sidebar);
+}
+
+.navLink {
+  display: flex;
+  align-items: center;
+  padding: 0.7rem 0.9rem;
+  border-radius: 14px;
+  color: var(--text-muted);
+  text-decoration: none;
+  border: 2px solid transparent;
+  background: transparent;
+  transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.navLink:hover {
+  background: #FFF5F3;
+  color: var(--primary);
+  border-color: rgba(200, 16, 46, 0.14);
+  box-shadow: 2px 3px 0px rgba(180, 60, 30, 0.18), inset 0 1px 0 rgba(255,255,255,0.9);
+  transform: translateX(2px);
+}
+
+/* Active link — clay red pill */
+.activeLink {
+  background: var(--primary-light) !important;
+  color: var(--primary) !important;
+  border-color: rgba(200, 16, 46, 0.25) !important;
+  font-weight: 800;
+  box-shadow: 3px 5px 0px rgba(200, 16, 46, 0.35), inset 0 1px 0 rgba(255,255,255,0.7) !important;
+}
+
+.activeLink .iconWrapper {
+  color: var(--primary) !important;
+}
+
+.iconWrapper {
+  font-size: 1.2rem;
+  min-width: 24px;
+  display: flex;
+  justify-content: center;
+  transition: color 0.2s ease;
+}
+
+.linkText {
+  margin-left: 0.75rem;
+  white-space: nowrap;
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+/* ── Footer ─────────────────────────────────────────────────────────────── */
+.sidebarFooter {
+  padding: 0.85rem;
+  border-top: 2px solid var(--border-clay);
+  background: var(--bg-sidebar);
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.userAvatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: var(--primary);
+  border: 2px solid rgba(200, 16, 46, 0.40);
+  box-shadow: 2px 3px 0px rgba(165, 14, 38, 0.55), inset 0 1px 0 rgba(255,255,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 800;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.userDetails {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.userName {
+  color: var(--text-main);
+  font-weight: 700;
+  font-size: 0.83rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.userRole {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.logoutButton {
+  background: transparent;
+  border: 2px solid transparent;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem;
+  border-radius: 10px;
+  transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+  margin-left: auto;
+}
+
+.logoutButton:hover {
+  background: var(--primary-light);
+  border-color: rgba(200, 16, 46, 0.25);
+  color: var(--primary);
+  box-shadow: 2px 3px 0px rgba(200, 16, 46, 0.28);
+}
+
+.logoutButtonCompact {
+  background: transparent;
+  border: 2px solid transparent;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  width: 100%;
+  border-radius: 10px;
+  transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.logoutButtonCompact:hover {
+  background: var(--primary-light);
+  border-color: rgba(200, 16, 46, 0.25);
+  color: var(--primary);
+  box-shadow: 2px 3px 0px rgba(200, 16, 46, 0.28);
+}
+
+.themeToggleBtn {
+  background: #FFF5F3;
+  border: 2px solid rgba(200, 16, 46, 0.14);
+  color: var(--text-muted);
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem;
+  border-radius: 10px;
+  box-shadow: 2px 3px 0px rgba(180, 60, 30, 0.18), inset 0 1px 0 rgba(255,255,255,0.9);
+  transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+  margin-left: auto;
+}
+
+.themeToggleBtn:hover {
+  transform: translateY(-1px);
+  color: var(--primary);
+  box-shadow: 3px 5px 0px rgba(180, 60, 30, 0.22), inset 0 1px 0 rgba(255,255,255,0.9);
+}
+
+.themeToggleBtnCompact {
+  background: transparent;
+  border: 2px solid transparent;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  width: 100%;
+  border-radius: 10px;
+  transition: all 0.18s ease;
+}
+
+.themeToggleBtnCompact:hover {
+  background: #FFF5F3;
+  color: var(--primary);
+}
