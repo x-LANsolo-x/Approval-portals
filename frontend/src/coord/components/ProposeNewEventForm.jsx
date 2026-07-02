@@ -311,7 +311,7 @@ const ProposeNewEventForm = () => {
                     </div>
                     <div className={styles.formGroup}>
                         <label>Activity ID</label>
-                        <input type="text" name="entryActivityId" value={formData.entryActivityId} onChange={handleChange} placeholder="(Submit id after CUIMS punching)" />
+                        <input type="text" name="entryActivityId" value={formData.entryActivityId} onChange={handleChange} disabled placeholder="Lock (Fill in Past Events tab only)" />
                     </div>
                     <div className={styles.formGroup}>
                         <label>Entity Type <span style={{color: 'red'}}>*</span></label>
