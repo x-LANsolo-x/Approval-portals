@@ -9,6 +9,7 @@ import {
   Navigate
 } from "react-router-dom";
 import Login from "./pages/Login";
+import Home from "./pages/Home";
 import Settings from "./pages/Settings";
 import ProtectedRoute from "./components/ProtectedRoutes";
 import Swal from "sweetalert2";
@@ -165,7 +166,7 @@ function AppContent() {
               path="/"
               element={isLoggedIn
                 ? <Navigate to={homeDashboardRoute()} />
-                : <Navigate to="/login" />}
+                : <Home theme={theme} toggleTheme={toggleTheme} />}
             />
             <Route
               path="/club-dashboard"

@@ -168,6 +168,19 @@ def _cached_sheet(spreadsheet_id, sheet_name):
 
 
 
+
+def _cached__cached_append_to_sheet(spreadsheet_id, sheet_name, row_data):
+    res = _cached_append_to_sheet(spreadsheet_id, sheet_name, row_data)
+    if res:
+        _cache.invalidate(f"{spreadsheet_id}::{sheet_name}")
+    return res
+
+def _cached__cached_update_sheet_row(spreadsheet_id, sheet_name, row_index, row_data, start_col_index=0):
+    res = _cached_update_sheet_row(spreadsheet_id, sheet_name, row_index, row_data, start_col_index)
+    if res:
+        _cache.invalidate(f"{spreadsheet_id}::{sheet_name}")
+    return res
+
 def dictfetchall(cursor):
     "Return all rows from a cursor as a dict"
     columns = [col[0] for col in cursor.description]
@@ -643,6 +656,7 @@ def update_budget(request):
                 WHERE {id_field} = %s
             """, [new_approved_budget, additional_spent, registration_code])
             
+        clear_details_cache()
         return JsonResponse({'success': True, 'message': 'Budget updated successfully in local database'})
     except Exception as e:
         return JsonResponse({'error': f'Failed to update budget: {str(e)}'}, status=500)
@@ -735,7 +749,7 @@ def proposed_events(request, row_index=None):
                 data.get('outcome', ''),
                 data.get('description', '')
             ]
-            append_to_sheet(PROPOSED_EVENTS_SPREADSHEET_ID, 'Sheet1', row_data)
+            _cached_append_to_sheet(PROPOSED_EVENTS_SPREADSHEET_ID, 'Sheet1', row_data)
             return JsonResponse({'success': True, 'message': 'Proposed Event added successfully!'})
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
@@ -764,7 +778,7 @@ def proposed_events(request, row_index=None):
                 data.get('outcome', ''),
                 data.get('description', '')
             ]
-            update_sheet_row(PROPOSED_EVENTS_SPREADSHEET_ID, 'Sheet1', row_index, row_data)
+            _cached_update_sheet_row(PROPOSED_EVENTS_SPREADSHEET_ID, 'Sheet1', row_index, row_data)
             return JsonResponse({'success': True, 'message': 'Proposed Event updated successfully!'})
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
@@ -797,7 +811,7 @@ def events_propose(request):
                 data.get('expectedOutcome', ''),
                 data.get('presentationLink', '')
             ]
-            append_to_sheet(CALENDAR_SPREADSHEET_ID, 'Sheet1', row_data)
+            _cached_append_to_sheet(CALENDAR_SPREADSHEET_ID, 'Sheet1', row_data)
             return JsonResponse({'success': True, 'message': 'Event proposed successfully!'})
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
@@ -1288,7 +1302,7 @@ def auth_signup(request):
             return JsonResponse({'error': 'Missing required fields'}, status=400)
             
         row_data = [name, email, password, 'Student']
-        append_to_sheet(SPREADSHEET_ID, 'General', row_data)
+        _cached_append_to_sheet(SPREADSHEET_ID, 'General', row_data)
         return JsonResponse({'success': True, 'message': 'Account created successfully', 'role': 'Student'})
     except Exception as e:
         return JsonResponse({'error': 'Signup failed.'}, status=500)
@@ -1464,7 +1478,7 @@ def approval_forms_submit(request):
             master_sheet = 'CLUBS'
 
         # ── 1. Append full row to archive collection sheet ─────────────────
-        append_to_sheet('1_RE6n6V6yb2DL89HjkAACxgAkigMh1eJEAjGk3NI8Ig', dest_sheet, values)
+        _cached_append_to_sheet('1_RE6n6V6yb2DL89HjkAACxgAkigMh1eJEAjGk3NI8Ig', dest_sheet, values)
 
         # ── 2. Update specific columns in the master tracker ──────────────
         try:
@@ -1510,7 +1524,7 @@ def approval_forms_submit(request):
                         data.get('entrySection', ''),        # Q (16)
                         'Form Submitted',                    # R (17)
                     ]
-                    update_sheet_row(club_sheet_id, master_sheet, target_row_idx, update_values, start_col_index=9)
+                    _cached_update_sheet_row(club_sheet_id, master_sheet, target_row_idx, update_values, start_col_index=9)
 
                 elif master_sheet == 'DEPT SOCIETIES':
                     # Cols K-R (0-indexed 10-17)
@@ -1524,7 +1538,7 @@ def approval_forms_submit(request):
                         data.get('entryOutcome', ''),        # Q (16)
                         'Form Submitted',                    # R (17)
                     ]
-                    update_sheet_row(club_sheet_id, master_sheet, target_row_idx, update_values, start_col_index=10)
+                    _cached_update_sheet_row(club_sheet_id, master_sheet, target_row_idx, update_values, start_col_index=10)
 
                 elif master_sheet == 'PROF. SOCIETIES':
                     # Cols H-O (0-indexed 7-14)
@@ -1538,7 +1552,7 @@ def approval_forms_submit(request):
                         data.get('entryOutcome', ''),        # N (13)
                         'Form Submitted',                    # O (14)
                     ]
-                    update_sheet_row(club_sheet_id, master_sheet, target_row_idx, update_values, start_col_index=7)
+                    _cached_update_sheet_row(club_sheet_id, master_sheet, target_row_idx, update_values, start_col_index=7)
 
                 elif master_sheet == 'COMMUNITIES':
                     # Cols K-R (0-indexed 10-17)
@@ -1552,7 +1566,7 @@ def approval_forms_submit(request):
                         data.get('entryOutcome', ''),        # Q (16)
                         'Form Submitted',                    # R (17)
                     ]
-                    update_sheet_row(club_sheet_id, master_sheet, target_row_idx, update_values, start_col_index=10)
+                    _cached_update_sheet_row(club_sheet_id, master_sheet, target_row_idx, update_values, start_col_index=10)
 
             else:
                 print(f'[approval_forms_submit] Event "{target_event_name}" not found in {master_sheet}')
@@ -1614,7 +1628,7 @@ def update_master_status(request):
             
             for i in range(start_row, len(rows)):
                 if len(rows[i]) > event_name_idx and rows[i][event_name_idx].strip().lower() == target_event_name:
-                    update_sheet_row(master_id, sheet, i, [new_status], start_col_index=status_idx)
+                    _cached_update_sheet_row(master_id, sheet, i, [new_status], start_col_index=status_idx)
                     updated = True
                     break
             if updated: break
@@ -1691,7 +1705,7 @@ def propose_new_event(request):
             dest_sheet = 'New club'
 
         archive_id = '1_RE6n6V6yb2DL89HjkAACxgAkigMh1eJEAjGk3NI8Ig'
-        append_to_sheet(archive_id, dest_sheet, values)
+        _cached_append_to_sheet(archive_id, dest_sheet, values)
 
         _cache.invalidate(
             f"{archive_id}::New club",
